@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+build
+coverage
+public
+package-lock.json
+
+# Client-provided baseline brief. Never reformatted.
+docs/project/project-brief.md
