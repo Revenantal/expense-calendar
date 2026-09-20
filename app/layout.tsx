@@ -11,8 +11,8 @@ const sans = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: 'Project Name',
-  description: 'Short project description.',
+  title: 'Expense Calendar',
+  description: 'Track expenses on a calendar.',
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

@@ -1,30 +1,8 @@
-# Next.js Project Template
+# Expense Calendar
 
-Starting point for Next.js projects. It carries the documentation structure, coding practices, git workflow, tooling config, and component organization used across these projects, with a minimal runnable app.
+Track expenses on a calendar.
 
-## What's Included
-
-- Next.js 16 App Router with React 19 and TypeScript
-- Tailwind CSS 4, ESLint, and Prettier already configured
-- `lucide-react` for icons
-- Vitest and React Testing Library with an example test
-- GitHub Actions CI running format, lint, test, and build
-- `docs/` structure for requirements, practices, and maintenance notes
-- `AGENTS.md` and `CLAUDE.md` with project rules for AI coding agents
-- Design and content registries under `app/_design/` and `app/_content/`
-- Error pages, `sitemap.ts`, and `robots.ts`
-- Pull request template and Conventional Commits workflow
-
-## Starting A New Project
-
-1. Copy this repository, or use it as a GitHub template.
-2. Update `name` in `package.json`.
-3. Replace this README with a real project README.
-4. Replace `docs/project/project-brief.md` with the client brief, or delete it.
-5. Replace the placeholder tokens in `app/globals.css` and `app/_design/` with the real design values.
-6. Update `docs/maintainability/design-system.md` and `project-overview.md`.
-7. Copy `.env.example` to `.env` and fill in the values.
-8. Delete anything the project does not need, then update the references to it in `docs/README.md`, `AGENTS.md`, and `CLAUDE.md`.
+Built from the [nextjs-ai-template](https://github.com/Revenantal/nextjs-ai-template) starting point.
 
 ## Technology
 
@@ -53,7 +31,7 @@ Before making project, design, content, or implementation decisions, review:
 4. `docs/development/coding-practices.md`
 5. Relevant files in `docs/maintainability/`
 
-Important: `docs/project/project-brief.md` is client-provided and should not be modified. Record deviations in `docs/project/project-exceptions.md`.
+Important: `docs/project/project-brief.md` is the baseline requirement document and should not be modified. Record deviations in `docs/project/project-exceptions.md`.
 
 ## Structure
 
@@ -61,7 +39,7 @@ Important: `docs/project/project-brief.md` is client-provided and should not be 
 app/
   _components/
     ui/         Shared primitives: buttons, cards, form fields
-    sections/   Repeated page modules: heroes, feature grids, CTA blocks
+    sections/   Repeated page modules
     site/       Site chrome: header, nav, footer
   _content/     Shared content registries
   _design/      Design token metadata
@@ -132,21 +110,6 @@ npm run build
 ```
 
 CI runs these same checks on pull requests into `stage` and `main`.
-
-## Coding Practices
-
-See `docs/development/coding-practices.md` for full guidance.
-
-Key practices:
-
-- Use TypeScript for application code.
-- Prefer Server Components by default.
-- Use Client Components only when browser interactivity is required.
-- Use one component with variant props instead of near-duplicate components.
-- Use design tokens instead of hardcoded values.
-- Keep the project lightweight and easy to maintain.
-- Avoid unnecessary backend features, databases, CMS functionality, and complex application patterns unless explicitly approved.
-- Use the styling tools already configured: Tailwind CSS, global CSS, and CSS Modules.
 
 ## Git Workflow
 

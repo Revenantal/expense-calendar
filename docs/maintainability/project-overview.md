@@ -4,7 +4,9 @@ Long-term overview for maintaining this project after the initial build.
 
 ## Purpose
 
-Describe what this project is, who it is for, and what it needs to do. Keep this short.
+Expense Calendar is a tool for tracking expenses against dates on a calendar.
+
+Scope, users, and required features are not yet defined. Fill this in once the requirements are decided, and record them in `docs/project/project-brief.md`.
 
 ## Source of Truth
 
