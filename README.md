@@ -27,11 +27,10 @@ Before making project, design, content, or implementation decisions, review:
 
 1. `docs/README.md`
 2. `docs/project/project-brief.md`
-3. `docs/project/project-exceptions.md`
-4. `docs/development/coding-practices.md`
-5. Relevant files in `docs/maintainability/`
+3. `docs/development/coding-practices.md`
+4. Relevant files in `docs/maintainability/`
 
-Important: `docs/project/project-brief.md` is the baseline requirement document and should not be modified. Record deviations in `docs/project/project-exceptions.md`.
+`docs/project/project-brief.md` is the single source of current requirements. It is a living document on this project — edit it directly as requirements change, keeping the reasoning alongside the rule it explains.
 
 ## Structure
 

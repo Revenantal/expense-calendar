@@ -468,8 +468,8 @@ Writing guidance:
 - Use technical terms when they are accurate and helpful, but do not overuse them.
 - Write for quick understanding by another developer or project stakeholder.
 
-When implementation decisions affect requirements, sitemap, content, design, or exceptions:
+When implementation decisions affect requirements, sitemap, content, or design:
 
 - Update the appropriate file in `docs/`.
-- Do not edit `docs/project/project-brief.md`.
-- Use `docs/project/project-exceptions.md` for approved deviations or clarifications.
+- Record requirement changes in `docs/project/project-brief.md`, keeping the reasoning alongside the rule.
+- Record departures from these practices in `docs/project/project-exceptions.md`.

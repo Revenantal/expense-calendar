@@ -14,4 +14,4 @@ One file per distinct phase of work, such as `design-system.md`, `core-pages.md`
 - Keep plans short and current. Update status as work happens.
 - Keep completed plans as reference records rather than deleting them. Mark them complete at the top.
 - Do not duplicate requirements from the project brief. Link to them.
-- Record approved scope changes in `docs/project/project-exceptions.md`, not here.
+- Record scope changes in `docs/project/project-brief.md`, not here.

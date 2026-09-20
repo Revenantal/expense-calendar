@@ -2,15 +2,14 @@
 
 - Use `docs/` as the source of truth for project documentation, requirements, organization, and planning.
 - Read `docs/README.md` first to understand the documentation structure.
-- Use `docs/project/project-exceptions.md` for approved project clarifications, deviations, and working notes.
 - Use `docs/maintainability/` for long-term built-project guidance.
-- Treat `docs/project/project-brief.md` as the client-provided baseline brief. **Do not modify, rewrite, summarize into, reformat, or otherwise edit it.**
-- Record approved deviations from the brief or reference material in `docs/project/project-exceptions.md`, not in the project brief.
+- `docs/project/project-brief.md` is the single source of current requirements and a living document. There is no external client, so it is edited directly as requirements change. Keep it accurate, and keep the reasoning alongside the rules it explains.
+- `docs/project/project-exceptions.md` holds approved departures from the project's own process rules. Application behaviour belongs in the brief, not there.
 - Keep implementation and organization lightweight unless the client explicitly approves more complexity.
 - Follow `docs/development/coding-practices.md` for project-wide coding and implementation practices.
 - Follow `docs/development/git-workflow.md` for commit, branch, and pull request practices.
 - Keep comments, documentation, and project notes simple, direct, and easy to read.
-- Approved clarifications and deviations are documented in `docs/project/project-exceptions.md`; follow that file rather than duplicating exception details here.
+- Requirements and their reasoning live in `docs/project/project-brief.md`; read that file rather than duplicating details here.
 
 # Framework Version
 

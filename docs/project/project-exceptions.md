@@ -1,38 +1,28 @@
 # Project Exceptions
 
-Approved deviations, clarifications, and working notes for this project.
+Approved departures from the documented process rules in `AGENTS.md`, `CLAUDE.md`, `docs/README.md`, and `docs/development/`.
 
-This file supersedes `project-brief.md` where the two conflict. The brief is never edited; every change to the agreed scope is recorded here instead.
-
-## How To Use This File
-
-Add an entry whenever:
-
-- The client approves a change to the brief.
-- A requirement in the brief turns out to be ambiguous and gets clarified.
-- A requirement is deferred, dropped, or replaced.
-- An implementation decision materially departs from what the brief implies.
-
-Do not record routine implementation detail here. That belongs in `docs/maintainability/`.
+This file is only for exceptions to how the project is _run_. How the application behaves belongs in `project-brief.md`, and implementation practice belongs in `docs/development/` or `docs/maintainability/`.
 
 ## Entry Format
-
-Use one section per exception.
 
 ```md
 ## Short title
 
 **Date:** YYYY-MM-DD
-**Status:** Approved | Proposed | Superseded
-**Requested by:** Name or source
-
-**Brief says:** What the original brief required.
-
-**Change:** What is being done instead.
-
-**Why:** The reason for the deviation.
+**Rule:** The documented rule being departed from.
+**Exception:** What is done instead.
+**Why:** The reason.
 ```
 
 ## Exceptions
 
-_No exceptions recorded yet._
+## Brief is a living document
+
+**Date:** 2026-09-20
+
+**Rule:** `docs/project/project-brief.md` is a client-provided baseline and must never be modified, with deviations recorded separately.
+
+**Exception:** The brief is edited directly as requirements change, and is the single source of current requirements. Reasoning is kept alongside the rules it explains.
+
+**Why:** There is no external client. The read-only rule protects a third party's baseline from silent drift; with the owner setting requirements directly, it only adds friction. Git history records what changed.
