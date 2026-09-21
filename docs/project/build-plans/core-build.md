@@ -4,7 +4,25 @@ Initial build of the expense calendar, from data model to working UI.
 
 Requirements live in `docs/project/project-brief.md`. This plan does not restate them; it covers how they get built.
 
-**Status:** Not started
+**Status:** Phases 1-3 complete. Logic layer done and tested; UI next.
+
+## Progress
+
+- **Phase 1 — Dates, holidays, recurrence.** Done. `0103896`
+- **Phase 2 — Money, types, storage.** Done. `817718c`
+- **Phase 3 — Income periods.** Done. `68e5f2a`
+
+231 tests passing. Two things surfaced during the build and are worth
+carrying forward:
+
+- **Occurrences belong to the date they land on**, not the date they were
+  scheduled. Expansion generates over a widened window and filters on the
+  final date, so a payment scheduled April 1 that shifts back to March 31
+  appears in March and not April. The first implementation lost such
+  occurrences entirely; the Phase 1 checkpoint caught it.
+- **A `validation.ts` module was added** beyond the planned files. Storage and
+  import both need to check untrusted data field by field, and duplicating
+  that in two places would let them drift.
 
 ## Goal
 
