@@ -87,6 +87,24 @@ export function formatSignedMoney(cents: number, locale?: string): string {
 }
 
 /**
+ * Formats cents without a currency symbol, for dense places like day cells.
+ *
+ * The symbol is dropped rather than stripped from a formatted string: `CAD`
+ * renders as `CA$` in some locales, so a regex looking for a bare `$` would
+ * silently leave it in place.
+ *
+ * @param cents - Amount in cents.
+ * @param locale - Locale to format for. Defaults to the browser's.
+ * @returns A formatted number such as `1,000.00`.
+ */
+export function formatAmount(cents: number, locale?: string): string {
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(cents / MINOR_UNITS)
+}
+
+/**
  * Sums amounts in cents.
  *
  * Exact because the inputs are integers. Exists so call sites read clearly

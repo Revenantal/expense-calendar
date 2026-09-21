@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatMoney, formatSignedMoney, parseAmount, sumCents, toDecimalString } from './money'
+import {
+  formatAmount,
+  formatMoney,
+  formatSignedMoney,
+  parseAmount,
+  sumCents,
+  toDecimalString,
+} from './money'
 
 describe('parseAmount', () => {
   it('parses whole dollars', () => {
@@ -82,6 +89,21 @@ describe('formatMoney', () => {
 
   it('groups thousands', () => {
     expect(formatMoney(123456789, 'en-CA')).toBe('$1,234,567.89')
+  })
+})
+
+describe('formatAmount', () => {
+  it('omits the currency symbol entirely', () => {
+    // CAD renders as "CA$" in some locales, so stripping a bare "$" from a
+    // formatted string would leave "CA" behind.
+    expect(formatAmount(100_000, 'en-CA')).toBe('1,000.00')
+    expect(formatAmount(1234, 'en-CA')).toBe('12.34')
+    expect(formatAmount(0, 'en-CA')).toBe('0.00')
+  })
+
+  it('always shows two decimal places', () => {
+    expect(formatAmount(1200, 'en-CA')).toBe('12.00')
+    expect(formatAmount(5, 'en-CA')).toBe('0.05')
   })
 })
 
