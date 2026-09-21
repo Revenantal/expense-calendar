@@ -4,25 +4,57 @@ Initial build of the expense calendar, from data model to working UI.
 
 Requirements live in `docs/project/project-brief.md`. This plan does not restate them; it covers how they get built.
 
-**Status:** Phases 1-3 complete. Logic layer done and tested; UI next.
+**Status:** Complete. All eight phases done, 311 tests passing.
 
 ## Progress
 
 - **Phase 1 — Dates, holidays, recurrence.** Done. `0103896`
 - **Phase 2 — Money, types, storage.** Done. `817718c`
 - **Phase 3 — Income periods.** Done. `68e5f2a`
+- **Phase 4 — Dark theme tokens.** Done. `e632265`
+- **Phase 5 — Provider and calendar.** Done. `c319e39`, `23d6c81`
+- **Phase 6 — Transaction modal.** Done. `e29ff7d`
+- **Phases 7 and 8 — Panels, export/import.** Done. `00b369f`
 
-231 tests passing. Two things surfaced during the build and are worth
-carrying forward:
+## What The Build Changed
+
+Decisions made while building that the plan did not anticipate.
 
 - **Occurrences belong to the date they land on**, not the date they were
   scheduled. Expansion generates over a widened window and filters on the
   final date, so a payment scheduled April 1 that shifts back to March 31
   appears in March and not April. The first implementation lost such
   occurrences entirely; the Phase 1 checkpoint caught it.
-- **A `validation.ts` module was added** beyond the planned files. Storage and
-  import both need to check untrusted data field by field, and duplicating
-  that in two places would let them drift.
+- **A `validation.ts` module was added.** Storage and import both check
+  untrusted data field by field, and duplicating that would let them drift.
+- **The chart's arms scale independently.** A shared scale is more honest in
+  principle, but a paycheck is often 20x any single bill, so it fills its arm
+  and flattens every expense into an invisible sliver. Each arm scales to its
+  own peak and the axis states both, which keeps the choice explicit.
+- **Amount formatting needed a symbol-free variant.** `CAD` renders as `CA$`
+  in some locales, so stripping a leading `$` from a formatted string silently
+  left the `CA` behind.
+
+## What Running The App Caught
+
+Three bugs passed the test suite and failed in a browser. Worth remembering
+that a green suite is not the same as a working screen.
+
+- Date formatters rendered a day early. They build UTC instants, which `Intl`
+  then rendered in local time — the same drift plain date strings exist to
+  prevent. Fixed with `timeZone: 'UTC'` and a regression test.
+- A `<label>` wrapping a `<select>` absorbs the option text into the field's
+  accessible name, so "Repeats" announced as "Repeats Once Every N days
+  Weekly…". jsdom matched it; a real browser did not.
+- The month grid stopped short of the viewport with dead space below, from a
+  broken flex height chain.
+
+## Manual Verification
+
+Run in a browser against the real app: empty first run, adding a paycheck,
+periods appearing, a business-day shift landing on the correct day,
+persistence across reload, an edit splitting a series, a scoped delete, and an
+export/import round trip with a junk file rejected.
 
 ## Goal
 
