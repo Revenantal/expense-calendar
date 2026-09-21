@@ -20,6 +20,23 @@ type MonthGridProps = {
   onAddTransaction: (date: IsoDate) => void
 }
 
+/**
+ * Places a day within the selected pay period, for the span marker.
+ *
+ * @param date - Day to place.
+ * @param period - Selected pay period, if any.
+ * @returns Where the day sits, or undefined when outside the period.
+ */
+function periodPositionFor(
+  date: IsoDate,
+  period?: { start: IsoDate; end: IsoDate }
+): 'start' | 'inside' | 'end' | undefined {
+  if (!period || date < period.start || date > period.end) return undefined
+  if (date === period.start) return 'start'
+  if (date === period.end) return 'end'
+  return 'inside'
+}
+
 /** Arrow keys move by a day or a week; Home and End jump within the week. */
 const KEY_OFFSETS: Record<string, number> = {
   ArrowLeft: -1,
@@ -36,6 +53,7 @@ export function MonthGrid({ onAddTransaction }: MonthGridProps) {
     occurrences,
     visibleMonth,
     selectedDate,
+    selectedPeriod,
     today,
     selectDate,
     goToMonth,
@@ -136,6 +154,7 @@ export function MonthGrid({ onAddTransaction }: MonthGridProps) {
             day={day}
             occurrences={byDate.get(day.date) ?? []}
             isSelected={day.date === selectedDate}
+            periodPosition={periodPositionFor(day.date, selectedPeriod)}
             onSelect={selectDate}
             onContextMenu={(date, position) => setMenu({ date, position })}
           />

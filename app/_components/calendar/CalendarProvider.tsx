@@ -11,7 +11,9 @@ import {
   type ReactNode,
 } from 'react'
 
+import { buildMonthGrid } from '@/app/_lib/calendar-grid'
 import { addMonths, fromParts, lastDayOfMonth, toParts, today as todayDate } from '@/app/_lib/dates'
+import { buildPeriods, findPaycheck, type IncomePeriod } from '@/app/_lib/income-periods'
 import { expandAll } from '@/app/_lib/recurrence'
 import { loadData, saveTransactions } from '@/app/_lib/storage'
 import type { IsoDate, Occurrence, Transaction } from '@/app/_lib/types'
@@ -19,13 +21,18 @@ import type { IsoDate, Occurrence, Transaction } from '@/app/_lib/types'
 /** State and actions shared by the calendar and its panels. */
 type CalendarContextValue = {
   transactions: Transaction[]
-  /** Occurrences for the visible month, recomputed when either changes. */
+  /**
+   * Occurrences across the whole visible grid, including the leading and
+   * trailing days borrowed from the adjacent months.
+   */
   occurrences: Occurrence[]
   /** Any date within the month on display. */
   visibleMonth: IsoDate
   /** First and last date of the visible month. */
   monthRange: { start: IsoDate; end: IsoDate }
   selectedDate: IsoDate
+  /** The pay period covering the selected day, when a paycheck is defined. */
+  selectedPeriod?: IncomePeriod
   /** Today, captured once on mount so it cannot change mid-render. */
   today: IsoDate
   /** True until stored data has loaded, so the UI can avoid a flash of empty. */
@@ -100,10 +107,29 @@ export function CalendarProvider({ children, initialToday }: CalendarProviderPro
     return { start, end: lastDayOfMonth(start) }
   }, [visibleMonth])
 
+  // The grid shows six weeks, so it spills into the months either side.
+  // Expanding only the current month would leave those cells with a date
+  // number and nothing in them, which reads as "nothing scheduled" rather
+  // than "not loaded".
+  const gridRange = useMemo(() => {
+    const days = buildMonthGrid(visibleMonth, today)
+    return { start: days[0].date, end: days[days.length - 1].date }
+  }, [visibleMonth, today])
+
   const occurrences = useMemo(
-    () => expandAll(transactions, monthRange.start, monthRange.end),
-    [transactions, monthRange]
+    () => expandAll(transactions, gridRange.start, gridRange.end),
+    [transactions, gridRange]
   )
+
+  // The pay period covering the selected day, so the grid can show its span.
+  const selectedPeriod = useMemo(() => {
+    const paycheck = findPaycheck(transactions)
+    if (!paycheck) return undefined
+
+    return buildPeriods(paycheck, selectedDate, selectedDate).find(
+      (candidate) => selectedDate >= candidate.start && selectedDate <= candidate.end
+    )
+  }, [transactions, selectedDate])
 
   /**
    * Applies a change to the transaction list and persists the result.
@@ -174,6 +200,7 @@ export function CalendarProvider({ children, initialToday }: CalendarProviderPro
       visibleMonth,
       monthRange,
       selectedDate,
+      selectedPeriod,
       today,
       loading,
       storageError,
@@ -194,6 +221,7 @@ export function CalendarProvider({ children, initialToday }: CalendarProviderPro
       visibleMonth,
       monthRange,
       selectedDate,
+      selectedPeriod,
       today,
       loading,
       storageError,

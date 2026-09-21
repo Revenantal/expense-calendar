@@ -20,6 +20,8 @@ type DayCellProps = {
   day: CalendarDay
   occurrences: Occurrence[]
   isSelected: boolean
+  /** Where this day sits in the selected pay period, if inside one. */
+  periodPosition?: 'start' | 'inside' | 'end'
   onSelect: (date: string) => void
   onContextMenu: (date: string, position: { x: number; y: number }) => void
 }
@@ -31,7 +33,14 @@ type DayCellProps = {
  * menu. Cells are a fixed height and never scroll — overflow goes to the day
  * detail panel, which is built for reading.
  */
-export function DayCell({ day, occurrences, isSelected, onSelect, onContextMenu }: DayCellProps) {
+export function DayCell({
+  day,
+  occurrences,
+  isSelected,
+  periodPosition,
+  onSelect,
+  onContextMenu,
+}: DayCellProps) {
   const holiday = holidayOn(day.date)
   const net = netTotal(occurrences)
   const shown = occurrences.slice(0, VISIBLE_TRANSACTIONS)
@@ -57,14 +66,32 @@ export function DayCell({ day, occurrences, isSelected, onSelect, onContextMenu 
         }
       }}
       className={[
-        'flex h-full min-h-0 cursor-pointer flex-col gap-1 overflow-hidden border-r border-b border-line p-1.5 text-left transition-colors',
+        'relative flex h-full min-h-0 cursor-pointer flex-col gap-1 overflow-hidden border-r border-b border-line p-1.5 text-left transition-colors',
         'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
         day.inMonth ? 'bg-panel hover:bg-raised' : 'bg-surface',
+        periodPosition && 'bg-accent/5',
         isSelected && 'ring-1 ring-accent ring-inset',
       ]
         .filter(Boolean)
         .join(' ')}
     >
+      {/* A rail along the top edge marks the pay period. It runs unbroken
+          across the days in the span, with the ends capped, so the duration
+          reads as one stretch rather than a set of tinted cells. */}
+      {periodPosition && (
+        <span
+          aria-hidden="true"
+          className={[
+            'absolute top-0 h-0.75 bg-accent',
+            periodPosition === 'start' && 'left-1 right-0 rounded-l-full',
+            periodPosition === 'end' && 'left-0 right-1 rounded-r-full',
+            periodPosition === 'inside' && 'left-0 right-0',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        />
+      )}
+
       <div className="flex items-baseline justify-between gap-1">
         <span
           className={[

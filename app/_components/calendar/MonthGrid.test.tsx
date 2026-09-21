@@ -132,6 +132,40 @@ describe('day cells', () => {
     expect(within(cell!).getByText('2,500.00')).toBeInTheDocument()
   })
 
+  it('fills trailing days borrowed from the next month', async () => {
+    // The grid shows six weeks, so early April is visible from March. Those
+    // cells must carry their transactions, not just a date number.
+    renderGrid([rent, pay])
+    const cell = (await screen.findAllByRole('gridcell')).find(
+      (element) => element.dataset.date === '2026-04-01'
+    )
+
+    expect(cell).toBeDefined()
+    expect(within(cell!).getByText('Rent')).toBeInTheDocument()
+    expect(within(cell!).getByText('Salary')).toBeInTheDocument()
+  })
+
+  it('fills leading days borrowed from the previous month', async () => {
+    const user = userEvent.setup()
+    renderGrid([rent, pay])
+
+    // April 2026 starts on a Wednesday, so the grid opens with late March.
+    await user.click(await screen.findByRole('button', { name: /next month/i }))
+    const cell = screen
+      .getAllByRole('gridcell')
+      .find((element) => element.dataset.date === '2026-03-31')
+
+    expect(cell).toBeDefined()
+    expect(within(cell!).queryByText('Rent')).not.toBeInTheDocument()
+
+    // March 30 has nothing, but April 1 in the same grid does — confirming the
+    // range covers both ends rather than just one.
+    const april = screen
+      .getAllByRole('gridcell')
+      .find((element) => element.dataset.date === '2026-04-01')
+    expect(within(april!).getByText('Rent')).toBeInTheDocument()
+  })
+
   it('names a holiday on its day', async () => {
     renderGrid()
     const user = userEvent.setup()
@@ -213,6 +247,48 @@ describe('selection', () => {
     await user.keyboard('{ArrowRight}')
 
     expect(screen.getByRole('heading', { name: /april 2026/i })).toBeInTheDocument()
+  })
+})
+
+describe('pay period span', () => {
+  /** Counts cells carrying the period rail. */
+  function railCells() {
+    return screen
+      .getAllByRole('gridcell')
+      .filter((cell) => cell.querySelector('span.bg-accent[aria-hidden="true"]'))
+      .map((cell) => cell.dataset.date)
+  }
+
+  it('marks every day of the period containing the selection', async () => {
+    renderGrid([pay])
+    await screen.findAllByRole('gridcell')
+
+    // Today is 2026-03-15, so the period runs the 15th to the 31st.
+    const marked = railCells()
+    expect(marked).toContain('2026-03-15')
+    expect(marked).toContain('2026-03-20')
+    expect(marked).toContain('2026-03-31')
+    expect(marked).not.toContain('2026-03-14')
+  })
+
+  it('moves the span when another period is selected', async () => {
+    const user = userEvent.setup()
+    renderGrid([pay])
+
+    const cells = await screen.findAllByRole('gridcell')
+    await user.click(cells.find((element) => element.dataset.date === '2026-03-05')!)
+
+    const marked = railCells()
+    expect(marked).toContain('2026-03-01')
+    expect(marked).toContain('2026-03-14')
+    expect(marked).not.toContain('2026-03-15')
+  })
+
+  it('marks nothing when no paycheck is defined', async () => {
+    renderGrid([rent])
+    await screen.findAllByRole('gridcell')
+
+    expect(railCells()).toHaveLength(0)
   })
 })
 

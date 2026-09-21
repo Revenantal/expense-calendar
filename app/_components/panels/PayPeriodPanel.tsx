@@ -59,8 +59,15 @@ export function PayPeriodPanel() {
 
   return (
     <PanelShell>
-      <p className="text-[11px] text-muted">
-        {formatShortDate(period.start)} — {formatShortDate(period.end)}
+      <p className="flex items-center justify-between gap-2 text-[11px] text-muted">
+        <span>
+          {formatShortDate(period.start)} — {formatShortDate(period.end)}
+        </span>
+        {/* Stated as a count because period lengths vary: a shifted paycheck
+            moves the boundary, so two periods in the same month can differ. */}
+        <span className="shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-accent">
+          {days.length} days
+        </span>
       </p>
 
       <PayPeriodChart days={days} today={today} />
