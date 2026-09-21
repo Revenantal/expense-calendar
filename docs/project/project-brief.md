@@ -46,7 +46,9 @@ Every N months matters specifically — quarterly bills are common and a monthly
 
 Semi-monthly is its own rule rather than two separate monthly rules. This matters for pay: the owner is paid semi-monthly, and income periods derive from a single paycheck transaction, so that transaction has to be able to express the whole schedule on its own.
 
-**Short months:** when a monthly rule targets a day that does not exist in a given month, the occurrence clamps to the last day of that month. A bill set to the 31st falls on Feb 28 (or Feb 29 in a leap year). Clamping is used rather than skipping so a payment is never silently hidden in months where the date does not exist.
+**Last day of month:** monthly and semi-monthly rules can target the last day of the month directly, rather than naming a number. Paid on the last day is a real schedule, and no fixed number expresses it — the 31st is wrong in a 30-day month.
+
+**Short months:** when a monthly rule targets a numbered day that does not exist in a given month, the occurrence clamps to the last day of that month. A bill set to the 31st falls on Feb 28 (or Feb 29 in a leap year). Clamping is used rather than skipping so a payment is never silently hidden in months where the date does not exist.
 
 **Series end:** a recurrence may run indefinitely or stop on an end date.
 
@@ -137,6 +139,8 @@ Two consequences worth knowing:
 The full history stays in the data, so a change view could be added later without a model change.
 
 **Changing the recurrence rule itself** — not the amount or label, but the schedule — only supports **this and all future** or **all occurrences**. "Just this one" has no meaning when the thing being changed is the pattern. To move a single occurrence, edit its date as a per-occurrence override instead.
+
+**A manually moved occurrence is not business-day shifted.** If an occurrence is moved to a specific date, it stays there even if that date is a weekend or holiday. The move is a deliberate choice about that one occurrence, and an automatic rule should not override an explicit instruction.
 
 ### Amounts and Currency
 
