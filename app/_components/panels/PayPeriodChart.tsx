@@ -45,20 +45,17 @@ export function PayPeriodChart({ days, today }: PayPeriodChartProps) {
   const zeroY = TOP_PAD + plotHeight / 2
   const armHeight = plotHeight / 2
 
-  // Each arm scales to its own peak. A shared scale sounds more honest, but a
-  // single paycheck is often 20x any one bill — it fills its arm and flattens
-  // every expense into an invisible sliver, which hides the thing the panel
-  // exists to show. The arms answer different questions, so they get their own
-  // scales, and the axis labels say what each peak is.
-  const incomePeak = Math.max(...days.map((day) => day.income), 1)
-  const expensePeak = Math.max(...days.map((day) => day.expenses), 1)
+  // One scale across both arms, so bar heights are directly comparable: a
+  // 1,400 bill against 3,600 income draws at roughly half the height. Scaling
+  // each arm to its own peak would make every expense look full-size relative
+  // to the largest expense, which hides how much of the pay each one consumes.
+  const peak = Math.max(...days.flatMap((day) => [day.income, day.expenses]), 1)
 
   // Percentage geometry keeps the chart fluid without measuring the container.
   const slotWidth = 100 / days.length
   const barWidth = Math.min(slotWidth - BAR_GAP, BAR_MAX_WIDTH)
 
-  const scaleIncome = (cents: number) => (cents / incomePeak) * armHeight
-  const scaleExpense = (cents: number) => (cents / expensePeak) * armHeight
+  const scale = (cents: number) => (cents / peak) * armHeight
 
   const active = hovered !== undefined ? days[hovered] : undefined
 
@@ -90,8 +87,8 @@ export function PayPeriodChart({ days, today }: PayPeriodChartProps) {
         {days.map((day, index) => {
           const centre = index * slotWidth + slotWidth / 2
           const x = centre - barWidth / 2
-          const incomeHeight = scaleIncome(day.income)
-          const expenseHeight = scaleExpense(day.expenses)
+          const incomeHeight = scale(day.income)
+          const expenseHeight = scale(day.expenses)
           const isToday = day.date === today
 
           return (
@@ -145,17 +142,11 @@ export function PayPeriodChart({ days, today }: PayPeriodChartProps) {
         })}
       </svg>
 
-      {/* The arms are scaled independently, so each peak is stated. Without
-          this the reader would compare bar lengths across the baseline and
-          read a false ratio. */}
       <div className="flex justify-between text-[10px] text-muted">
         <span>
           Day {dayNumber(days[0].date)}–{dayNumber(days[days.length - 1].date)}
         </span>
-        <span>
-          peak <span className="text-income">{formatAmount(incomePeak)}</span> /{' '}
-          <span className="text-expense">{formatAmount(expensePeak)}</span>
-        </span>
+        <span>scale {formatAmount(peak)}</span>
       </div>
 
       <figcaption

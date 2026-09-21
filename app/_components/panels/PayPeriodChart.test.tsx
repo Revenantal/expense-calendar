@@ -46,22 +46,47 @@ describe('PayPeriodChart', () => {
     expect(Number(expenses[0].getAttribute('y'))).toBe(zero)
   })
 
-  it('states each arm peak, since the arms scale independently', () => {
+  it('states the scale', () => {
     render(<PayPeriodChart days={days} today="2026-03-01" />)
-    expect(screen.getByText(/2,500\.00/)).toBeInTheDocument()
-    expect(screen.getByText(/220\.00/)).toBeInTheDocument()
+    expect(screen.getByText(/scale 2,500\.00/)).toBeInTheDocument()
   })
 
-  it('scales each arm to its own peak', () => {
+  it('draws both arms on one scale, so heights are comparable', () => {
+    // 22,000 against a 250,000 peak is 8.8% of the arm. Sharing the scale is
+    // what makes a bill readable as a fraction of the pay it comes out of.
     const { container } = render(<PayPeriodChart days={days} today="2026-03-01" />)
+    const armHeight = (132 - 10 - 16) / 2
+
+    const income = [...container.querySelectorAll('rect')].find((rect) =>
+      rect.getAttribute('fill')?.includes('color-income')
+    )
     const expenses = [...container.querySelectorAll('rect')].filter((rect) =>
       rect.getAttribute('fill')?.includes('color-expense')
     )
+    const tallestExpense = Math.max(...expenses.map((r) => Number(r.getAttribute('height'))))
 
-    // The larger expense fills its arm; a shared scale would leave both as
-    // slivers beside the much larger paycheck.
-    const tallest = Math.max(...expenses.map((r) => Number(r.getAttribute('height'))))
-    expect(tallest).toBe((132 - 10 - 16) / 2)
+    expect(Number(income!.getAttribute('height'))).toBeCloseTo(armHeight, 5)
+    expect(tallestExpense).toBeCloseTo((22_000 / 250_000) * armHeight, 5)
+  })
+
+  it('draws a bill at half height against double the income', () => {
+    const half = [
+      { date: '2026-03-01', income: 360_000, expenses: 0 },
+      { date: '2026-03-02', income: 0, expenses: 180_000 },
+    ]
+    const { container } = render(<PayPeriodChart days={half} today="2026-03-01" />)
+
+    const income = [...container.querySelectorAll('rect')].find((rect) =>
+      rect.getAttribute('fill')?.includes('color-income')
+    )
+    const expense = [...container.querySelectorAll('rect')].find((rect) =>
+      rect.getAttribute('fill')?.includes('color-expense')
+    )
+
+    expect(Number(expense!.getAttribute('height'))).toBeCloseTo(
+      Number(income!.getAttribute('height')) / 2,
+      5
+    )
   })
 
   it('shows a day total on hover', async () => {
