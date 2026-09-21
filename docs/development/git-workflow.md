@@ -67,6 +67,8 @@ Branch protection expectations:
 - Work targeting `stage` or `main` should happen on a short-lived branch created from the target branch.
 - Merge back through a pull request.
 
+> **Exception on this project:** commits go directly to `main` — see `docs/project/project-exceptions.md`. Run the quality checks before committing, since there is no PR gate to catch a failure.
+
 ## Branch Naming
 
 Use short, descriptive branch names with a type prefix.
