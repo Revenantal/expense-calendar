@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
@@ -12,7 +12,12 @@ const sans = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: 'Expense Calendar',
-  description: 'Track expenses on a calendar.',
+  description: 'See upcoming income and expenses laid out by date.',
+}
+
+export const viewport: Viewport = {
+  colorScheme: 'dark',
+  themeColor: '#141413',
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

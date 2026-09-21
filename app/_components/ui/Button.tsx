@@ -31,9 +31,9 @@ type ButtonAsButtonProps = SharedButtonProps & {
 type ButtonProps = ButtonAsLinkProps | ButtonAsButtonProps
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'bg-accent text-white hover:opacity-90',
-  secondary: 'bg-ink text-white hover:opacity-90',
-  outline: 'border border-line text-ink hover:bg-panel',
+  primary: 'bg-accent text-surface hover:opacity-90',
+  secondary: 'bg-raised text-ink hover:bg-line',
+  outline: 'border border-line text-ink hover:bg-raised',
   text: 'px-0 py-0 text-accent hover:underline',
 }
 
@@ -46,7 +46,7 @@ const sizeClasses: Record<ButtonSize, string> = {
 /** Builds the shared class list for button and link variants. */
 function getButtonClasses(variant: ButtonVariant, size: ButtonSize, className: string) {
   return [
-    'inline-flex items-center justify-center gap-2 font-display font-medium leading-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-accent disabled:pointer-events-none disabled:bg-line disabled:text-muted',
+    'inline-flex items-center justify-center gap-2 font-display font-medium leading-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-accent disabled:pointer-events-none disabled:bg-panel disabled:text-past',
     variantClasses[variant],
     variant === 'text' ? 'text-[15px]' : sizeClasses[size],
     className,

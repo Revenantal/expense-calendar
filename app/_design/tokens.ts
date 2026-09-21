@@ -1,11 +1,15 @@
 /**
  * Keyed design token metadata.
  *
- * Runtime values live in `app/globals.css`. These registries hold the
- * human-readable metadata so components reference one shared definition
- * instead of drifting to slightly different hardcoded values.
+ * Runtime values live in the `@theme inline` block in `app/globals.css`.
+ * These registries hold the human-readable metadata so components reference
+ * one shared definition instead of drifting to slightly different hardcoded
+ * values.
  *
- * Replace these placeholder tokens with the project's real design values.
+ * Changing a value here does nothing on its own — update `globals.css` too.
+ *
+ * The theme is dark only. Contrast ratios against `surface` are noted where
+ * they matter; they were measured, not estimated.
  */
 
 export type ColorToken = {
@@ -33,69 +37,118 @@ export type BorderToken = {
 export const colorTokens = {
   surface: {
     label: 'Surface',
-    value: '#ffffff',
+    value: '#1a1a19',
     cssVariable: '--color-surface',
     className: 'bg-surface',
-    usage: 'Page background.',
+    usage: 'Calendar grid and chart background.',
   },
   panel: {
     label: 'Panel',
-    value: '#f5f5f5',
+    value: '#212120',
     cssVariable: '--color-panel',
     className: 'bg-panel',
-    usage: 'Cards, sidebars, and inset blocks.',
+    usage: 'Side panels, day cells, and inset blocks.',
+  },
+  raised: {
+    label: 'Raised',
+    value: '#2a2a28',
+    cssVariable: '--color-raised',
+    className: 'bg-raised',
+    usage: 'Modals, menus, and hovered cells.',
   },
   line: {
     label: 'Line',
-    value: '#e0e0e0',
+    value: '#3a3a37',
     cssVariable: '--color-line',
     className: 'bg-line',
-    usage: 'Hairline borders and dividers.',
+    usage: 'Grid lines, borders, and dividers.',
   },
-  accent: {
-    label: 'Accent',
-    value: '#1a56db',
-    cssVariable: '--color-accent',
-    className: 'bg-accent',
-    usage: 'Primary actions and active states.',
+  lineStrong: {
+    label: 'Line strong',
+    value: '#4d4d49',
+    cssVariable: '--color-line-strong',
+    className: 'bg-line-strong',
+    usage: 'Chart zero line and emphasised edges.',
   },
   ink: {
     label: 'Ink',
-    value: '#111827',
+    value: '#f5f5f3',
     cssVariable: '--color-ink',
     className: 'bg-ink',
-    usage: 'Headings and high-contrast text.',
+    usage: 'Headings, amounts, and high-contrast text. 15.96:1.',
   },
   body: {
     label: 'Body text',
-    value: '#374151',
+    value: '#c3c2b7',
     cssVariable: '--color-body',
     className: 'bg-body',
-    usage: 'Default paragraph copy.',
+    usage: 'Default copy and transaction labels. 9.72:1.',
   },
   muted: {
     label: 'Muted text',
-    value: '#6b7280',
+    value: '#8a8a82',
     cssVariable: '--color-muted',
     className: 'bg-muted',
-    usage: 'Labels, captions, and legal text.',
+    usage: 'Captions, weekday headings, and axis labels. 5.01:1.',
+  },
+  past: {
+    label: 'Past day',
+    value: '#6e6e68',
+    cssVariable: '--color-past',
+    className: 'bg-past',
+    usage: 'De-emphasised past days. Faded but still legible at 3.39:1.',
+  },
+  income: {
+    label: 'Income',
+    value: '#3987e5',
+    cssVariable: '--color-income',
+    className: 'bg-income',
+    usage: 'Income amounts and chart bars above the baseline. 4.79:1.',
+  },
+  expense: {
+    label: 'Expense',
+    value: '#e66767',
+    cssVariable: '--color-expense',
+    className: 'bg-expense',
+    usage: 'Expense amounts and chart bars below the baseline. 5.39:1.',
+  },
+  accent: {
+    label: 'Accent',
+    value: '#3987e5',
+    cssVariable: '--color-accent',
+    className: 'bg-accent',
+    usage: 'Focus rings, selection, and primary actions.',
+  },
+  holiday: {
+    label: 'Holiday',
+    value: '#c98500',
+    cssVariable: '--color-holiday',
+    className: 'bg-holiday',
+    usage: 'Payment-affecting holidays. Paired with a marker, never colour alone.',
+  },
+  holidayMuted: {
+    label: 'Holiday informational',
+    value: '#7a6a4a',
+    cssVariable: '--color-holiday-muted',
+    className: 'bg-holiday-muted',
+    usage: 'Holidays that do not stop payments processing.',
   },
 } as const satisfies Record<string, ColorToken>
 
 export const shadowTokens = {
   raised: {
     label: 'Raised',
-    value: '0 1px 3px rgba(0, 0, 0, 0.12)',
+    value: '0 1px 3px rgba(0, 0, 0, 0.4)',
     cssVariable: '--shadow-raised',
     className: 'shadow-raised',
-    usage: 'Cards and elevated panels.',
+    usage: 'Cards and elevated panels. Deeper than a light theme needs.',
   },
   overlay: {
     label: 'Overlay',
-    value: '0 12px 32px rgba(0, 0, 0, 0.18)',
+    value: '0 12px 32px rgba(0, 0, 0, 0.55)',
     cssVariable: '--shadow-overlay',
     className: 'shadow-overlay',
-    usage: 'Drawers, dropdowns, and modal-style overlays.',
+    usage: 'Menus and modals.',
   },
 } as const satisfies Record<string, ShadowToken>
 

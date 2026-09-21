@@ -3,28 +3,55 @@
 /*
  * Runtime design token definitions.
  * Keep these in sync with the metadata registries in app/_design/.
+ *
+ * Dark theme only. There is no light mode, so these are plain values rather
+ * than a pair swapped by a media query.
+ *
+ * Contrast against the surface, measured rather than eyeballed:
+ *   ink 15.96:1 · body 9.72:1 · muted 5.01:1 · past 3.39:1
+ *   income 4.79:1 · expense 5.39:1
  */
 
 :root {
-  --background: #ffffff;
-  --foreground: #111827;
+  color-scheme: dark;
+  --background: #141413;
+  --foreground: #f5f5f3;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-surface: #ffffff;
-  --color-panel: #f5f5f5;
-  --color-line: #e0e0e0;
-  --color-accent: #1a56db;
-  --color-ink: #111827;
-  --color-body: #374151;
-  --color-muted: #6b7280;
+
+  /* Surfaces, darkest to lightest. */
+  --color-surface: #1a1a19;
+  --color-panel: #212120;
+  --color-raised: #2a2a28;
+  --color-line: #3a3a37;
+  --color-line-strong: #4d4d49;
+
+  /* Text. */
+  --color-ink: #f5f5f3;
+  --color-body: #c3c2b7;
+  --color-muted: #8a8a82;
+  --color-past: #6e6e68;
+
+  /* Income and expense. Validated for colour-vision deficiency and contrast
+   * against the surface; worst-case separation 19.2 under protanopia. Do not
+   * substitute without re-running the palette validator. */
+  --color-income: #3987e5;
+  --color-expense: #e66767;
+  --color-accent: #3987e5;
+
+  /* Holidays. Payment-affecting days are distinguished from informational
+   * ones by more than colour: only the former carry a marker dot. */
+  --color-holiday: #c98500;
+  --color-holiday-muted: #7a6a4a;
+
   --font-display: var(--font-sans);
   --font-body: var(--font-sans);
   --container-container: 1280px;
-  --shadow-raised: 0 1px 3px rgba(0, 0, 0, 0.12);
-  --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.18);
+  --shadow-raised: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.55);
 }
 
 * {
