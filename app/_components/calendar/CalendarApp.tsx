@@ -2,12 +2,15 @@
 
 import { useState } from 'react'
 
-import { applyEdit, type EditScope } from '@/app/_lib/edit-scopes'
-import type { IsoDate, Transaction } from '@/app/_lib/types'
+import { applyDelete, applyEdit, type EditScope } from '@/app/_lib/edit-scopes'
+import type { IsoDate, Occurrence, Transaction } from '@/app/_lib/types'
 
-import { TransactionModal, type TransactionFormValues } from '../transaction/TransactionModal'
+import { DayDetailPanel } from '../panels/DayDetailPanel'
+import { PayPeriodPanel } from '../panels/PayPeriodPanel'
 import { ScopePrompt } from '../transaction/ScopePrompt'
+import { TransactionModal, type TransactionFormValues } from '../transaction/TransactionModal'
 import { CalendarProvider, useCalendar } from './CalendarProvider'
+import { DataControls } from './DataControls'
 import { MonthGrid } from './MonthGrid'
 
 /**
@@ -29,28 +32,28 @@ type ModalState =
   | { mode: 'add'; date: IsoDate }
   | { mode: 'edit'; date: IsoDate; transaction: Transaction; scheduledDate: IsoDate }
 
-/** A saved edit waiting on a scope choice. */
-type PendingEdit = {
+/** A change waiting on a scope choice. */
+type PendingScope = {
+  action: 'edit' | 'delete'
   transaction: Transaction
   scheduledDate: IsoDate
-  values: TransactionFormValues
+  values?: TransactionFormValues
   ruleChanged: boolean
 }
 
-/**
- * Arranges the calendar and its side column, and owns the modal flow.
- *
- * The right column takes the pay period summary and day detail panels; both
- * arrive in Phase 7.
- */
+/** Arranges the calendar and its side column, and owns the modal flow. */
 function CalendarLayout() {
   const { loading, storageError, dismissStorageError, addTransaction, replaceAll, transactions } =
     useCalendar()
 
   const [modal, setModal] = useState<ModalState>()
-  const [pendingEdit, setPendingEdit] = useState<PendingEdit>()
+  const [pending, setPending] = useState<PendingScope>()
 
-  /** Saves a new transaction, or routes an edit through the scope prompt. */
+  /** Replaces one transaction with whatever a scope change produced. */
+  const commit = (original: Transaction, replacement: Transaction[]) => {
+    replaceAll([...transactions.filter((existing) => existing.id !== original.id), ...replacement])
+  }
+
   const handleSave = (values: TransactionFormValues, ruleChanged: boolean) => {
     if (modal?.mode === 'add') {
       addTransaction({
@@ -71,50 +74,65 @@ function CalendarLayout() {
 
     if (modal?.mode !== 'edit') return
 
-    // A one-off has only one occurrence, so every scope means the same thing.
-    if (modal.transaction.rule.type === 'once') {
-      applyScope('all', {
-        transaction: modal.transaction,
-        scheduledDate: modal.scheduledDate,
-        values,
-        ruleChanged,
-      })
-      return
-    }
-
-    setPendingEdit({
+    const scopePending: PendingScope = {
+      action: 'edit',
       transaction: modal.transaction,
       scheduledDate: modal.scheduledDate,
       values,
       ruleChanged,
-    })
+    }
+
+    // A one-off has a single occurrence, so every scope means the same thing.
+    if (modal.transaction.rule.type === 'once') {
+      applyScope('all', scopePending)
+      return
+    }
+
+    setPending(scopePending)
     setModal(undefined)
   }
 
-  /** Applies a pending edit at the chosen scope. */
-  const applyScope = (scope: EditScope, pending: PendingEdit) => {
-    const replacement = applyEdit(
-      pending.transaction,
-      pending.scheduledDate,
-      scope,
-      {
-        kind: pending.values.kind,
-        label: pending.values.label,
-        amountCents: pending.values.amountCents,
-        rule: pending.values.rule,
-        businessDayShift: pending.values.businessDayShift,
-        isPaycheck: pending.values.isPaycheck || undefined,
-      },
-      crypto.randomUUID()
-    )
+  /** Applies a pending edit or delete at the chosen scope. */
+  const applyScope = (scope: EditScope, target: PendingScope) => {
+    if (target.action === 'delete') {
+      commit(target.transaction, applyDelete(target.transaction, target.scheduledDate, scope))
+    } else if (target.values) {
+      commit(
+        target.transaction,
+        applyEdit(
+          target.transaction,
+          target.scheduledDate,
+          scope,
+          {
+            kind: target.values.kind,
+            label: target.values.label,
+            amountCents: target.values.amountCents,
+            rule: target.values.rule,
+            businessDayShift: target.values.businessDayShift,
+            isPaycheck: target.values.isPaycheck || undefined,
+          },
+          crypto.randomUUID()
+        )
+      )
+    }
 
-    replaceAll([
-      ...transactions.filter((existing) => existing.id !== pending.transaction.id),
-      ...replacement,
-    ])
-
-    setPendingEdit(undefined)
+    setPending(undefined)
     setModal(undefined)
+  }
+
+  const handleDelete = (occurrence: Occurrence, transaction: Transaction) => {
+    const target: PendingScope = {
+      action: 'delete',
+      transaction,
+      scheduledDate: occurrence.scheduledDate,
+      ruleChanged: false,
+    }
+
+    if (transaction.rule.type === 'once') {
+      applyScope('all', target)
+      return
+    }
+    setPending(target)
   }
 
   if (loading) {
@@ -127,6 +145,10 @@ function CalendarLayout() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex items-center justify-end">
+        <DataControls />
+      </div>
+
       {storageError && (
         <div
           role="alert"
@@ -148,13 +170,23 @@ function CalendarLayout() {
           <MonthGrid onAddTransaction={(date) => setModal({ mode: 'add', date })} />
         </div>
 
-        <aside aria-label="Summary" className="hidden w-[320px] shrink-0 flex-col gap-3 xl:flex">
-          <div className="rounded border border-line bg-panel p-3 text-[13px] text-muted">
-            Pay period summary — Phase 7.
-          </div>
-          <div className="flex-1 rounded border border-line bg-panel p-3 text-[13px] text-muted">
-            Day detail — Phase 7.
-          </div>
+        <aside
+          aria-label="Summary"
+          className="hidden min-h-0 w-[320px] shrink-0 flex-col gap-3 xl:flex"
+        >
+          <PayPeriodPanel />
+          <DayDetailPanel
+            onAdd={(date) => setModal({ mode: 'add', date })}
+            onEdit={(occurrence, transaction) =>
+              setModal({
+                mode: 'edit',
+                date: occurrence.date,
+                transaction,
+                scheduledDate: occurrence.scheduledDate,
+              })
+            }
+            onDelete={handleDelete}
+          />
         </aside>
       </div>
 
@@ -167,13 +199,13 @@ function CalendarLayout() {
         />
       )}
 
-      {pendingEdit && (
+      {pending && (
         <ScopePrompt
-          action="edit"
-          date={pendingEdit.scheduledDate}
-          ruleChanged={pendingEdit.ruleChanged}
-          onChoose={(scope) => applyScope(scope, pendingEdit)}
-          onCancel={() => setPendingEdit(undefined)}
+          action={pending.action}
+          date={pending.scheduledDate}
+          ruleChanged={pending.ruleChanged}
+          onChoose={(scope) => applyScope(scope, pending)}
+          onCancel={() => setPending(undefined)}
         />
       )}
     </div>
