@@ -188,7 +188,33 @@ describe('totalsForPeriod', () => {
       expenses: 0,
       thirdFigure: 0,
       kind: 'remaining',
+      net: 0,
     })
+  })
+
+  it('nets income against expenses across the period', () => {
+    // 250,000 in, 40,000 out.
+    expect(totalsForPeriod(occurrences, period, '2026-03-05').net).toBe(210_000)
+  })
+
+  it('reports a negative net when the period spends more than it takes in', () => {
+    const heavy = expandAll(
+      [expense({ id: 'big', seriesId: 'big', amountCents: 300_000, start: '2026-03-03' })],
+      '2026-03-01',
+      '2026-03-14'
+    )
+    expect(totalsForPeriod(heavy, period, '2026-03-05').net).toBe(-300_000)
+  })
+
+  it('nets the full period regardless of today', () => {
+    // Unlike the third figure, the net does not change meaning as the period
+    // passes — it is always the whole period.
+    const early = totalsForPeriod(occurrences, period, '2026-03-01')
+    const late = totalsForPeriod(occurrences, period, '2026-03-14')
+    const past = totalsForPeriod(occurrences, period, '2026-06-01')
+
+    expect(early.net).toBe(late.net)
+    expect(late.net).toBe(past.net)
   })
 })
 

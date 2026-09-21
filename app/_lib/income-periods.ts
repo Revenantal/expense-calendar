@@ -37,6 +37,14 @@ export type PeriodTotals = {
    */
   thirdFigure: number
   kind: ThirdFigureKind
+  /**
+   * Income less expenses across the whole period. Positive means the period
+   * ends up; negative means it spends more than it takes in.
+   *
+   * Always the full period, never "from today", so the figure does not change
+   * meaning as the period passes.
+   */
+  net: number
 }
 
 /**
@@ -152,6 +160,7 @@ export function totalsForPeriod(
     expenses,
     thirdFigure,
     kind: current ? 'remaining' : 'fullPeriod',
+    net: income - expenses,
   }
 }
 

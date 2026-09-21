@@ -75,6 +75,28 @@ export function PayPeriodPanel() {
           value={formatMoney(totals.thirdFigure)}
           tone="ink"
         />
+
+        {/* The headline: whether the period ends up or down. Spans all three
+            columns because it is the conclusion the other figures lead to. */}
+        <div className="col-span-3 mt-1 flex items-baseline justify-between gap-2 border-t border-line pt-2">
+          <dt className="text-[11px] text-muted">
+            Net for period
+            <span className="ml-1.5 text-[10px]">
+              {totals.net > 0 ? 'left over' : totals.net < 0 ? 'short' : 'break even'}
+            </span>
+          </dt>
+          <dd
+            className={`font-display text-[20px] leading-none font-medium tabular-nums ${
+              totals.net > 0 ? 'text-income' : totals.net < 0 ? 'text-expense' : 'text-ink'
+            }`}
+          >
+            {/* The sign carries the meaning, so it is explicit rather than
+                left to a minus that reads as a hyphen at a glance. */}
+            {totals.net > 0 && '+'}
+            {totals.net < 0 && '−'}
+            {formatMoney(Math.abs(totals.net))}
+          </dd>
+        </div>
       </dl>
     </PanelShell>
   )
