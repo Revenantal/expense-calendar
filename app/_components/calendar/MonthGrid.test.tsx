@@ -121,6 +121,17 @@ describe('day cells', () => {
     expect(within(cell!).getByText(/\+1,000\.00/)).toBeInTheDocument()
   })
 
+  it('shows each transaction amount in full', async () => {
+    // The amount never abbreviates; the label truncates instead.
+    renderGrid([rent, pay])
+    const cell = (await screen.findAllByRole('gridcell')).find(
+      (element) => element.dataset.date === '2026-03-01'
+    )
+
+    expect(within(cell!).getByText('1,500.00')).toBeInTheDocument()
+    expect(within(cell!).getByText('2,500.00')).toBeInTheDocument()
+  })
+
   it('names a holiday on its day', async () => {
     renderGrid()
     const user = userEvent.setup()
@@ -149,7 +160,8 @@ describe('day cells', () => {
       (element) => element.dataset.date === '2026-03-10'
     )
 
-    expect(within(cell!).getByText('+3 more')).toBeInTheDocument()
+    // Four pills fit, so two of the six are counted instead.
+    expect(within(cell!).getByText('+2 more')).toBeInTheDocument()
   })
 })
 

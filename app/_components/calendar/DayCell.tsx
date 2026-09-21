@@ -10,11 +10,11 @@ import type { Occurrence } from '@/app/_lib/types'
 /**
  * How many transactions a cell lists before showing a count.
  *
- * Three is what fits at the grid's usual height. Keep this in step with the
- * cell's real height — listing more than fits silently clips them, which
- * reads as missing data rather than a layout limit.
+ * Four pills plus the count fit at the grid's usual height. Keep this in step
+ * with the cell's real height — listing more than fits silently clips them,
+ * which reads as missing data rather than a layout limit.
  */
-const VISIBLE_TRANSACTIONS = 3
+const VISIBLE_TRANSACTIONS = 4
 
 type DayCellProps = {
   day: CalendarDay
@@ -111,26 +111,36 @@ export function DayCell({ day, occurrences, isSelected, onSelect, onContextMenu 
         </div>
       )}
 
-      <ul className="flex min-h-0 flex-col gap-0.5 overflow-hidden">
-        {shown.map((occurrence, index) => (
-          <li
-            key={`${occurrence.transactionId}-${occurrence.scheduledDate}-${index}`}
-            className={`flex items-center gap-1 truncate text-[11px] leading-tight ${
-              day.isPast ? 'text-past' : 'text-body'
-            }`}
-          >
-            <span
-              aria-hidden="true"
-              className={`size-1 shrink-0 rounded-full ${
-                occurrence.kind === 'income' ? 'bg-income' : 'bg-expense'
-              }`}
-            />
-            <span className="truncate">{occurrence.label}</span>
-          </li>
-        ))}
+      <ul className="flex min-h-0 flex-col gap-1 overflow-hidden">
+        {shown.map((occurrence, index) => {
+          const isIncome = occurrence.kind === 'income'
+
+          return (
+            <li
+              key={`${occurrence.transactionId}-${occurrence.scheduledDate}-${index}`}
+              // A tinted pill rather than a bullet: the fill carries the
+              // income/expense distinction across the full width, so the
+              // amount has somewhere to sit at the right edge.
+              className={`flex items-center justify-between gap-1 rounded-sm px-1 py-0.5 text-[11px] leading-tight ${
+                isIncome ? 'bg-income/15' : 'bg-expense/15'
+              } ${day.isPast ? 'opacity-55' : ''}`}
+            >
+              {/* The amount never truncates — it is the number being read.
+                  The label gives up characters instead. */}
+              <span className={`truncate ${isIncome ? 'text-income' : 'text-expense'}`}>
+                {occurrence.label}
+              </span>
+              <span
+                className={`shrink-0 tabular-nums ${isIncome ? 'text-income' : 'text-expense'}`}
+              >
+                {formatAmount(occurrence.amountCents)}
+              </span>
+            </li>
+          )
+        })}
 
         {hidden > 0 && (
-          <li className={`text-[10px] ${day.isPast ? 'text-past' : 'text-muted'}`}>
+          <li className={`px-1 text-[10px] ${day.isPast ? 'text-past' : 'text-muted'}`}>
             +{hidden} more
           </li>
         )}
