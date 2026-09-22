@@ -69,7 +69,27 @@ export type Transaction = {
   businessDayShift: ShiftDirection
   /** Marks the transaction income periods derive from. */
   isPaycheck?: boolean
+  /** Marks this as a contribution toward a goal, rather than a plain expense. */
+  goalId?: string
   exceptions: OccurrenceException[]
+}
+
+/** A savings target: an amount to reach by contributing over time. */
+export type Goal = {
+  id: string
+  label: string
+  /** Always positive. */
+  targetCents: number
+  /** First date a contribution can count toward this goal. */
+  start: IsoDate
+  /**
+   * Set when the goal has been manually archived.
+   * Archiving is always a deliberate action, never automatic on reaching the
+   * target — the user may keep contributing, or want to see it a while
+   * longer before tucking it away. Deleting removes the goal outright and is
+   * a separate action from archiving.
+   */
+  archived?: boolean
 }
 
 /** Why an occurrence landed somewhere other than its scheduled date. */
@@ -91,11 +111,13 @@ export type Occurrence = {
   label: string
   amountCents: number
   isPaycheck: boolean
+  goalId?: string
 }
 
 /** Everything persisted to browser storage. */
 export type StoredData = {
   schemaVersion: number
   transactions: Transaction[]
+  goals: Goal[]
   currency: string
 }

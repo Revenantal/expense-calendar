@@ -8,7 +8,7 @@
 
 import { SCHEMA_VERSION } from './storage'
 import { validateStoredData } from './validation'
-import type { StoredData, Transaction } from './types'
+import type { Goal, StoredData, Transaction } from './types'
 import { CURRENCY } from './money'
 
 /** Marks a file as ours, so an unrelated JSON file is rejected early. */
@@ -27,15 +27,21 @@ export type ImportResult = { ok: true; data: StoredData } | { ok: false; error: 
  * Builds the JSON text for an export file.
  *
  * @param transactions - Transactions to export.
+ * @param goals - Goals to export.
  * @param exportedAt - Timestamp to record. Defaults to now.
  * @returns Pretty-printed JSON, readable if it is ever opened by hand.
  */
-export function exportToJson(transactions: Transaction[], exportedAt: Date = new Date()): string {
+export function exportToJson(
+  transactions: Transaction[],
+  goals: Goal[],
+  exportedAt: Date = new Date()
+): string {
   const file: ExportFile = {
     format: EXPORT_FORMAT,
     exportedAt: exportedAt.toISOString(),
     schemaVersion: SCHEMA_VERSION,
     transactions,
+    goals,
     currency: CURRENCY,
   }
   return JSON.stringify(file, null, 2)

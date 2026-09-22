@@ -131,25 +131,29 @@ export function DayCell({
       <ul className="flex min-h-0 flex-col gap-1 overflow-hidden">
         {shown.map((occurrence, index) => {
           const isIncome = occurrence.kind === 'income'
+          const bgClass = occurrence.goalId
+            ? 'bg-goal/18'
+            : isIncome
+              ? 'bg-income/18'
+              : 'bg-expense/18'
+          const textClass = occurrence.goalId
+            ? 'text-goal'
+            : isIncome
+              ? 'text-income'
+              : 'text-expense'
 
           return (
             <li
               key={`${occurrence.transactionId}-${occurrence.scheduledDate}-${index}`}
               // A tinted pill rather than a bullet: the fill carries the
-              // income/expense distinction across the full width, so the
+              // income/expense/goal distinction across the full width, so the
               // amount has somewhere to sit at the right edge.
-              className={`flex items-center justify-between gap-1 rounded-full px-2 py-0.5 text-[11px] leading-tight ${
-                isIncome ? 'bg-income/18' : 'bg-expense/18'
-              } ${day.isPast ? 'opacity-55' : ''}`}
+              className={`flex items-center justify-between gap-1 rounded-full px-2 py-0.5 text-[11px] leading-tight ${bgClass} ${day.isPast ? 'opacity-55' : ''}`}
             >
               {/* The amount never truncates — it is the number being read.
                   The label gives up characters instead. */}
-              <span className={`truncate ${isIncome ? 'text-income' : 'text-expense'}`}>
-                {occurrence.label}
-              </span>
-              <span
-                className={`shrink-0 tabular-nums ${isIncome ? 'text-income' : 'text-expense'}`}
-              >
+              <span className={`truncate ${textClass}`}>{occurrence.label}</span>
+              <span className={`shrink-0 tabular-nums ${textClass}`}>
                 {formatMoney(occurrence.amountCents)}
               </span>
             </li>

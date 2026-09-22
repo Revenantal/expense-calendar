@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
-import type { Transaction } from '@/app/_lib/types'
+import type { Goal, Transaction } from '@/app/_lib/types'
 
 import { TransactionModal } from './TransactionModal'
 
@@ -22,7 +22,9 @@ function renderModal(props: Partial<Parameters<typeof TransactionModal>[0]> = {}
   const onSave = vi.fn()
   const onClose = vi.fn()
 
-  render(<TransactionModal date="2026-03-15" onSave={onSave} onClose={onClose} {...props} />)
+  render(
+    <TransactionModal date="2026-03-15" goals={[]} onSave={onSave} onClose={onClose} {...props} />
+  )
 
   return { onSave, onClose }
 }
@@ -160,6 +162,49 @@ describe('editing', () => {
     await user.click(screen.getByRole('button', { name: /save changes/i }))
 
     expect(onSave).toHaveBeenCalledWith(expect.anything(), true)
+  })
+})
+
+describe('goal contributions', () => {
+  const emergencyFund: Goal = {
+    id: 'goal-1',
+    label: 'Emergency fund',
+    targetCents: 300_000,
+    start: '2026-01-01',
+  }
+
+  it('offers the goal option only when a goal exists', () => {
+    renderModal({ goals: [] })
+    expect(screen.queryByRole('radio', { name: /goal/i })).not.toBeInTheDocument()
+  })
+
+  it('shows a goal picker instead of a label field when goal is selected', async () => {
+    const user = userEvent.setup()
+    renderModal({ goals: [emergencyFund] })
+
+    await user.click(screen.getByRole('radio', { name: /goal/i }))
+
+    expect(screen.queryByLabelText(/^label$/i)).not.toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: /goal/i })).toBeInTheDocument()
+  })
+
+  it('saves a goal contribution as an expense carrying the goal id and label', async () => {
+    const user = userEvent.setup()
+    const { onSave } = renderModal({ goals: [emergencyFund] })
+
+    await user.click(screen.getByRole('radio', { name: /goal/i }))
+    await user.type(screen.getByLabelText(/amount/i), '100')
+    await user.click(screen.getByRole('button', { name: /add transaction/i }))
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: 'expense',
+        label: 'Emergency fund',
+        goalId: 'goal-1',
+        amountCents: 10_000,
+      }),
+      false
+    )
   })
 })
 

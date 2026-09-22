@@ -159,3 +159,22 @@ export function formatMonthDay(date: IsoDate, locale?: string): string {
   })
   return formatter.format(new Date(Date.UTC(year, month - 1, day)))
 }
+
+/**
+ * Formats a date with its year, for a projection that may land well over a
+ * year out, such as a goal's expected completion date.
+ *
+ * @param date - Date to format.
+ * @param locale - Locale to format for. Defaults to the browser's.
+ * @returns A date such as `Jan 5, 2027`.
+ */
+export function formatLongDate(date: IsoDate, locale?: string): string {
+  const { year, month, day } = toParts(date)
+  const formatter = new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+  return formatter.format(new Date(Date.UTC(year, month - 1, day)))
+}

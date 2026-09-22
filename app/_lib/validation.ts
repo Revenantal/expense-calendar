@@ -13,6 +13,7 @@
 import { isIsoDate } from './dates'
 import type {
   DayOfMonth,
+  Goal,
   OccurrenceException,
   RecurrenceRule,
   StoredData,
@@ -43,6 +44,11 @@ export function validateStoredData(value: unknown): ValidationResult<StoredData>
   if (!Array.isArray(value.transactions)) {
     return fail('Missing or invalid transactions list.')
   }
+  // Absent on data saved before goals existed; treated as none rather than
+  // rejecting the whole file.
+  if (value.goals !== undefined && !Array.isArray(value.goals)) {
+    return fail('Invalid goals list.')
+  }
 
   const transactions: Transaction[] = []
   for (const [index, entry] of value.transactions.entries()) {
@@ -51,12 +57,58 @@ export function validateStoredData(value: unknown): ValidationResult<StoredData>
     transactions.push(result.data)
   }
 
+  const goals: Goal[] = []
+  for (const [index, entry] of (value.goals ?? []).entries()) {
+    const result = validateGoal(entry)
+    if (!result.ok) return fail(`Goal ${index + 1}: ${result.error}`)
+    goals.push(result.data)
+  }
+
   return {
     ok: true,
     data: {
       schemaVersion: value.schemaVersion,
       transactions,
+      goals,
       currency: value.currency,
+    },
+  }
+}
+
+/**
+ * Validates a single goal.
+ *
+ * @param value - Value of unknown shape.
+ * @returns The goal when valid, or the problem found.
+ */
+export function validateGoal(value: unknown): ValidationResult<Goal> {
+  if (!isRecord(value)) return fail('not an object.')
+
+  if (!isNonEmptyString(value.id)) return fail('missing id.')
+  if (typeof value.label !== 'string') return fail('missing label.')
+
+  if (
+    typeof value.targetCents !== 'number' ||
+    !Number.isInteger(value.targetCents) ||
+    value.targetCents <= 0
+  ) {
+    return fail('targetCents must be a positive whole number of cents.')
+  }
+
+  if (!isValidDate(value.start)) return fail('start is not a valid date.')
+
+  if (value.archived !== undefined && typeof value.archived !== 'boolean') {
+    return fail('archived must be true or false.')
+  }
+
+  return {
+    ok: true,
+    data: {
+      id: value.id,
+      label: value.label,
+      targetCents: value.targetCents,
+      start: value.start,
+      ...(typeof value.archived === 'boolean' && { archived: value.archived }),
     },
   }
 }
@@ -100,6 +152,9 @@ export function validateTransaction(value: unknown): ValidationResult<Transactio
   if (value.isPaycheck !== undefined && typeof value.isPaycheck !== 'boolean') {
     return fail('isPaycheck must be true or false.')
   }
+  if (value.goalId !== undefined && !isNonEmptyString(value.goalId)) {
+    return fail('goalId must be a non-empty string.')
+  }
 
   const rule = validateRule(value.rule)
   if (!rule.ok) return fail(rule.error)
@@ -125,6 +180,7 @@ export function validateTransaction(value: unknown): ValidationResult<Transactio
       ...(typeof value.end === 'string' && { end: value.end }),
       businessDayShift: value.businessDayShift as Transaction['businessDayShift'],
       ...(typeof value.isPaycheck === 'boolean' && { isPaycheck: value.isPaycheck }),
+      ...(typeof value.goalId === 'string' && { goalId: value.goalId }),
       exceptions,
     },
   }

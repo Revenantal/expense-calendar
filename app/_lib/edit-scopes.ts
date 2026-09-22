@@ -19,7 +19,7 @@ export type EditScope = 'this' | 'future' | 'all'
 /** Values an edit can change. */
 export type TransactionEdit = Pick<
   Transaction,
-  'kind' | 'label' | 'amountCents' | 'rule' | 'businessDayShift' | 'isPaycheck'
+  'kind' | 'label' | 'amountCents' | 'rule' | 'businessDayShift' | 'isPaycheck' | 'goalId'
 >
 
 /**

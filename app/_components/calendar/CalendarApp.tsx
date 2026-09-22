@@ -7,9 +7,11 @@ import type { IsoDate, Occurrence, Transaction } from '@/app/_lib/types'
 
 import { DayDetailPanel } from '../panels/DayDetailPanel'
 import { ForecastPanel } from '../panels/ForecastPanel'
+import { GoalsPanel } from '../panels/GoalsPanel'
 import { PayPeriodPanel } from '../panels/PayPeriodPanel'
 import { ScopePrompt } from '../transaction/ScopePrompt'
 import { TransactionModal, type TransactionFormValues } from '../transaction/TransactionModal'
+import { CollapsibleSection } from '../ui/CollapsibleSection'
 import { CalendarProvider, useCalendar } from './CalendarProvider'
 import { DataControls } from './DataControls'
 import { MonthGrid } from './MonthGrid'
@@ -44,8 +46,15 @@ type PendingScope = {
 
 /** Arranges the calendar and its side column, and owns the modal flow. */
 function CalendarLayout() {
-  const { loading, storageError, dismissStorageError, addTransaction, replaceAll, transactions } =
-    useCalendar()
+  const {
+    loading,
+    storageError,
+    dismissStorageError,
+    addTransaction,
+    replaceAll,
+    transactions,
+    goals,
+  } = useCalendar()
 
   const [modal, setModal] = useState<ModalState>()
   const [pending, setPending] = useState<PendingScope>()
@@ -67,6 +76,7 @@ function CalendarLayout() {
         start: values.date,
         businessDayShift: values.businessDayShift,
         ...(values.isPaycheck && { isPaycheck: true }),
+        ...(values.goalId && { goalId: values.goalId }),
         exceptions: [],
       })
       setModal(undefined)
@@ -111,6 +121,7 @@ function CalendarLayout() {
             rule: target.values.rule,
             businessDayShift: target.values.businessDayShift,
             isPaycheck: target.values.isPaycheck || undefined,
+            goalId: target.values.goalId,
           },
           crypto.randomUUID()
         )
@@ -176,21 +187,30 @@ function CalendarLayout() {
 
         <aside
           aria-label="Summary"
-          className="hidden min-h-0 w-[320px] shrink-0 flex-col gap-3 xl:flex"
+          className="sidebar-scroll hidden min-h-0 w-[320px] shrink-0 flex-col gap-3 overflow-y-auto xl:flex"
         >
-          <PayPeriodPanel />
-          <DayDetailPanel
-            onAdd={(date) => setModal({ mode: 'add', date })}
-            onEdit={(occurrence, transaction) =>
-              setModal({
-                mode: 'edit',
-                date: occurrence.date,
-                transaction,
-                scheduledDate: occurrence.scheduledDate,
-              })
-            }
-            onDelete={handleDelete}
-          />
+          <CollapsibleSection id="pay-period" label="Pay period">
+            <PayPeriodPanel />
+          </CollapsibleSection>
+
+          <CollapsibleSection id="goals" label="Goals">
+            <GoalsPanel />
+          </CollapsibleSection>
+
+          <CollapsibleSection id="day-detail" label="Day detail">
+            <DayDetailPanel
+              onAdd={(date) => setModal({ mode: 'add', date })}
+              onEdit={(occurrence, transaction) =>
+                setModal({
+                  mode: 'edit',
+                  date: occurrence.date,
+                  transaction,
+                  scheduledDate: occurrence.scheduledDate,
+                })
+              }
+              onDelete={handleDelete}
+            />
+          </CollapsibleSection>
         </aside>
       </div>
 
@@ -198,6 +218,7 @@ function CalendarLayout() {
         <TransactionModal
           date={modal.date}
           existing={modal.mode === 'edit' ? modal.transaction : undefined}
+          goals={goals}
           onSave={handleSave}
           onClose={() => setModal(undefined)}
         />

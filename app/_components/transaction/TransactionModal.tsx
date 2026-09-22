@@ -5,9 +5,12 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { formatShortDate } from '@/app/_lib/calendar-grid'
 import { parseAmount, toDecimalString } from '@/app/_lib/money'
-import type { IsoDate, RecurrenceRule, Transaction, TransactionKind } from '@/app/_lib/types'
+import type { Goal, IsoDate, RecurrenceRule, Transaction, TransactionKind } from '@/app/_lib/types'
 
 import { RecurrenceFields, defaultRule } from './RecurrenceFields'
+
+/** The three choices the form offers. A goal contribution saves as an expense. */
+type FormKind = TransactionKind | 'goal'
 
 /** Values the form collects. */
 export type TransactionFormValues = {
@@ -18,6 +21,7 @@ export type TransactionFormValues = {
   rule: RecurrenceRule
   businessDayShift: Transaction['businessDayShift']
   isPaycheck: boolean
+  goalId?: string
 }
 
 type TransactionModalProps = {
@@ -25,6 +29,8 @@ type TransactionModalProps = {
   date: IsoDate
   /** Present when editing; absent when adding. */
   existing?: Transaction
+  /** Goals available to contribute toward. Archived goals are not offered. */
+  goals: Goal[]
   onSave: (values: TransactionFormValues, ruleChanged: boolean) => void
   onClose: () => void
 }
@@ -40,14 +46,25 @@ const fieldClass =
  * Escape does close it, since a keypress is deliberate and keyboard users
  * rely on it.
  */
-export function TransactionModal({ date, existing, onSave, onClose }: TransactionModalProps) {
+export function TransactionModal({
+  date,
+  existing,
+  goals,
+  onSave,
+  onClose,
+}: TransactionModalProps) {
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const previouslyFocused = useRef<HTMLElement | null>(null)
 
-  const [kind, setKind] = useState<TransactionKind>(existing?.kind ?? 'expense')
+  const activeGoals = useMemo(() => goals.filter((goal) => !goal.archived), [goals])
+
+  const [kind, setKind] = useState<FormKind>(
+    existing?.goalId ? 'goal' : (existing?.kind ?? 'expense')
+  )
   const [label, setLabel] = useState(existing?.label ?? '')
+  const [goalId, setGoalId] = useState<string | undefined>(existing?.goalId ?? activeGoals[0]?.id)
   const [amount, setAmount] = useState(existing ? toDecimalString(existing.amountCents) : '')
   const [startDate, setStartDate] = useState<IsoDate>(existing?.start ?? date)
   const [rule, setRule] = useState<RecurrenceRule>(existing?.rule ?? defaultRule('once'))
@@ -57,7 +74,7 @@ export function TransactionModal({ date, existing, onSave, onClose }: Transactio
 
   const amountCents = useMemo(() => parseAmount(amount), [amount])
   const amountValid = amountCents !== undefined && amountCents >= 0
-  const labelValid = label.trim().length > 0
+  const labelValid = kind === 'goal' ? goalId !== undefined : label.trim().length > 0
 
   // Return focus where it was, so dismissing does not drop the user at the
   // top of the page.
@@ -105,15 +122,19 @@ export function TransactionModal({ date, existing, onSave, onClose }: Transactio
     const ruleChanged =
       existing !== undefined && JSON.stringify(existing.rule) !== JSON.stringify(rule)
 
+    const goal =
+      kind === 'goal' ? activeGoals.find((candidate) => candidate.id === goalId) : undefined
+
     onSave(
       {
-        kind,
-        label: label.trim(),
+        kind: kind === 'goal' ? 'expense' : kind,
+        label: goal ? goal.label : label.trim(),
         amountCents: amountCents!,
         date: startDate,
         rule,
         businessDayShift: shift,
         isPaycheck,
+        goalId: goal?.id,
       },
       ruleChanged
     )
@@ -148,7 +169,9 @@ export function TransactionModal({ date, existing, onSave, onClose }: Transactio
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 p-5">
           <fieldset className="flex gap-2">
             <legend className="sr-only">Type</legend>
-            {(['expense', 'income'] as const).map((option) => (
+            {(
+              ['expense', 'income', ...(activeGoals.length > 0 ? (['goal'] as const) : [])] as const
+            ).map((option) => (
               <label
                 key={option}
                 className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-[13px] capitalize transition-colors ${
@@ -166,7 +189,7 @@ export function TransactionModal({ date, existing, onSave, onClose }: Transactio
                 <span
                   aria-hidden="true"
                   className={`size-2 rounded-full ${
-                    option === 'income' ? 'bg-income' : 'bg-expense'
+                    option === 'income' ? 'bg-income' : option === 'goal' ? 'bg-goal' : 'bg-expense'
                   }`}
                 />
                 {option}
@@ -174,19 +197,36 @@ export function TransactionModal({ date, existing, onSave, onClose }: Transactio
             ))}
           </fieldset>
 
-          <label className="flex flex-col gap-1">
-            <span className="text-[12px] text-muted">Label</span>
-            <input
-              value={label}
-              onChange={(event) => setLabel(event.target.value)}
-              placeholder="Rent, Salary, Hydro…"
-              aria-invalid={touched && !labelValid}
-              className={fieldClass}
-            />
-            {touched && !labelValid && (
-              <span className="text-[11px] text-expense">Give the transaction a label.</span>
-            )}
-          </label>
+          {kind === 'goal' ? (
+            <label className="flex flex-col gap-1">
+              <span className="text-[12px] text-muted">Goal</span>
+              <select
+                value={goalId}
+                onChange={(event) => setGoalId(event.target.value)}
+                className={fieldClass}
+              >
+                {activeGoals.map((goal) => (
+                  <option key={goal.id} value={goal.id}>
+                    {goal.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <label className="flex flex-col gap-1">
+              <span className="text-[12px] text-muted">Label</span>
+              <input
+                value={label}
+                onChange={(event) => setLabel(event.target.value)}
+                placeholder="Rent, Salary, Hydro…"
+                aria-invalid={touched && !labelValid}
+                className={fieldClass}
+              />
+              {touched && !labelValid && (
+                <span className="text-[11px] text-expense">Give the transaction a label.</span>
+              )}
+            </label>
+          )}
 
           <label className="flex flex-col gap-1">
             <span className="text-[12px] text-muted">Amount</span>

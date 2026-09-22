@@ -133,6 +133,13 @@ export const colorTokens = {
     className: 'bg-holiday-muted',
     usage: 'Holidays that do not stop payments processing.',
   },
+  goal: {
+    label: 'Goal',
+    value: '#a374e6',
+    cssVariable: '--color-goal',
+    className: 'bg-goal',
+    usage: 'Goal contributions and progress bars. 5.14:1.',
+  },
 } as const satisfies Record<string, ColorToken>
 
 export const shadowTokens = {

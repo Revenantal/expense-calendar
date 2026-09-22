@@ -105,6 +105,7 @@ export function expandTransaction(
       label: override?.label ?? transaction.label,
       amountCents: override?.amountCents ?? transaction.amountCents,
       isPaycheck: transaction.isPaycheck === true,
+      ...(transaction.goalId && { goalId: transaction.goalId }),
     })
   }
 

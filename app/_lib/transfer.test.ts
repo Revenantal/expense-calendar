@@ -30,7 +30,7 @@ function makeFile(overrides: Record<string, unknown> = {}): string {
 
 describe('exportToJson', () => {
   it('writes a file that identifies itself', () => {
-    const parsed = JSON.parse(exportToJson([transaction]))
+    const parsed = JSON.parse(exportToJson([transaction], []))
 
     expect(parsed.format).toBe(EXPORT_FORMAT)
     expect(parsed.schemaVersion).toBe(SCHEMA_VERSION)
@@ -40,11 +40,11 @@ describe('exportToJson', () => {
 
   it('records when it was exported', () => {
     const at = new Date('2026-03-15T12:00:00.000Z')
-    expect(JSON.parse(exportToJson([], at)).exportedAt).toBe('2026-03-15T12:00:00.000Z')
+    expect(JSON.parse(exportToJson([], [], at)).exportedAt).toBe('2026-03-15T12:00:00.000Z')
   })
 
   it('is pretty-printed', () => {
-    expect(exportToJson([transaction])).toContain('\n  ')
+    expect(exportToJson([transaction], [])).toContain('\n  ')
   })
 })
 
@@ -58,7 +58,7 @@ describe('exportFilename', () => {
 
 describe('importFromJson', () => {
   it('round trips an exported file', () => {
-    const result = importFromJson(exportToJson([transaction]))
+    const result = importFromJson(exportToJson([transaction], []))
 
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.data.transactions).toEqual([transaction])
@@ -72,7 +72,7 @@ describe('importFromJson', () => {
   })
 
   it('rejects a truncated file', () => {
-    const truncated = exportToJson([transaction]).slice(0, 80)
+    const truncated = exportToJson([transaction], []).slice(0, 80)
     expect(importFromJson(truncated).ok).toBe(false)
   })
 

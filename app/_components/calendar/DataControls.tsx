@@ -15,12 +15,12 @@ import { useCalendar } from './CalendarProvider'
  * only recovery path, and doubles as the way to move between devices.
  */
 export function DataControls() {
-  const { transactions, replaceAll } = useCalendar()
+  const { transactions, goals, replaceAllData } = useCalendar()
   const fileRef = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<{ tone: 'error' | 'ok'; text: string }>()
 
   const handleExport = () => {
-    const blob = new Blob([exportToJson(transactions)], { type: 'application/json' })
+    const blob = new Blob([exportToJson(transactions, goals)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
 
     const link = document.createElement('a')
@@ -48,7 +48,7 @@ export function DataControls() {
     )
     if (!confirmed) return
 
-    replaceAll(result.data.transactions)
+    replaceAllData(result.data.transactions, result.data.goals)
     setMessage({ tone: 'ok', text: `Imported ${count} transactions.` })
   }
 

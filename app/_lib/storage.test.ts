@@ -9,7 +9,7 @@ import {
   saveTransactions,
   writeData,
 } from './storage'
-import type { StoredData, Transaction } from './types'
+import type { Goal, StoredData, Transaction } from './types'
 
 /** In-memory Storage stand-in, so tests never touch a real browser store. */
 function makeStorage(initial: Record<string, string> = {}): Storage {
@@ -51,6 +51,13 @@ const transaction: Transaction = {
   exceptions: [],
 }
 
+const goal: Goal = {
+  id: 'goal-1',
+  label: 'Emergency fund',
+  targetCents: 300_000,
+  start: '2026-01-01',
+}
+
 let storage: Storage
 
 beforeEach(() => {
@@ -58,19 +65,21 @@ beforeEach(() => {
 })
 
 describe('emptyData', () => {
-  it('carries the current schema version and no transactions', () => {
+  it('carries the current schema version and no transactions or goals', () => {
     expect(emptyData()).toEqual({
       schemaVersion: SCHEMA_VERSION,
       transactions: [],
+      goals: [],
       currency: 'CAD',
     })
   })
 })
 
 describe('round trip', () => {
-  it('saves and loads transactions', () => {
-    expect(saveTransactions([transaction], storage)).toEqual({ ok: true })
+  it('saves and loads transactions and goals', () => {
+    expect(saveTransactions([transaction], [goal], storage)).toEqual({ ok: true })
     expect(loadData(storage).transactions).toEqual([transaction])
+    expect(loadData(storage).goals).toEqual([goal])
   })
 
   it('preserves optional fields', () => {
@@ -79,14 +88,17 @@ describe('round trip', () => {
       end: '2026-12-31',
       isPaycheck: true,
       businessDayShift: 'previous',
+      goalId: 'goal-1',
       exceptions: [
         { type: 'skip', date: '2026-03-01' },
         { type: 'override', date: '2026-04-01', amountCents: 1000, movedTo: '2026-04-03' },
       ],
     }
+    const archivedGoal: Goal = { ...goal, archived: true }
 
-    saveTransactions([full], storage)
+    saveTransactions([full], [archivedGoal], storage)
     expect(loadData(storage).transactions[0]).toEqual(full)
+    expect(loadData(storage).goals[0]).toEqual(archivedGoal)
   })
 })
 
@@ -166,7 +178,7 @@ describe('writeData', () => {
 
 describe('clearData', () => {
   it('removes stored data', () => {
-    saveTransactions([transaction], storage)
+    saveTransactions([transaction], [], storage)
     expect(clearData(storage)).toEqual({ ok: true })
     expect(loadData(storage).transactions).toEqual([])
   })

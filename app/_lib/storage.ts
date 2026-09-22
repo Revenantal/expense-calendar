@@ -8,7 +8,7 @@
 
 import { CURRENCY } from './money'
 import { validateStoredData } from './validation'
-import type { StoredData, Transaction } from './types'
+import type { Goal, StoredData, Transaction } from './types'
 
 /** Key the data lives under. */
 export const STORAGE_KEY = 'expense-calendar:data'
@@ -26,7 +26,7 @@ export type WriteResult = { ok: true } | { ok: false; reason: string }
 
 /** Data used when storage is empty or unreadable. */
 export function emptyData(): StoredData {
-  return { schemaVersion: SCHEMA_VERSION, transactions: [], currency: CURRENCY }
+  return { schemaVersion: SCHEMA_VERSION, transactions: [], goals: [], currency: CURRENCY }
 }
 
 /**
@@ -72,14 +72,22 @@ export function loadData(storage?: Storage): StoredData {
 }
 
 /**
- * Writes transactions to storage.
+ * Writes transactions and goals to storage.
  *
  * @param transactions - Transactions to persist.
+ * @param goals - Goals to persist.
  * @param storage - Storage to write to. Defaults to `localStorage`.
  * @returns Whether the write succeeded, with a reason when it did not.
  */
-export function saveTransactions(transactions: Transaction[], storage?: Storage): WriteResult {
-  return writeData({ schemaVersion: SCHEMA_VERSION, transactions, currency: CURRENCY }, storage)
+export function saveTransactions(
+  transactions: Transaction[],
+  goals: Goal[],
+  storage?: Storage
+): WriteResult {
+  return writeData(
+    { schemaVersion: SCHEMA_VERSION, transactions, goals, currency: CURRENCY },
+    storage
+  )
 }
 
 /**

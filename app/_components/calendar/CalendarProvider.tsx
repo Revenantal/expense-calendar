@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
@@ -16,11 +17,12 @@ import { addMonths, fromParts, lastDayOfMonth, toParts, today as todayDate } fro
 import { buildPeriods, findPaycheck, type IncomePeriod } from '@/app/_lib/income-periods'
 import { expandAll } from '@/app/_lib/recurrence'
 import { loadData, saveTransactions } from '@/app/_lib/storage'
-import type { IsoDate, Occurrence, Transaction } from '@/app/_lib/types'
+import type { Goal, IsoDate, Occurrence, Transaction } from '@/app/_lib/types'
 
 /** State and actions shared by the calendar and its panels. */
 type CalendarContextValue = {
   transactions: Transaction[]
+  goals: Goal[]
   /**
    * Occurrences across the whole visible grid, including the leading and
    * trailing days borrowed from the adjacent months.
@@ -48,6 +50,11 @@ type CalendarContextValue = {
   updateTransaction: (transaction: Transaction) => void
   removeTransaction: (id: string) => void
   replaceAll: (transactions: Transaction[]) => void
+  /** Replaces both lists at once, for a full import. */
+  replaceAllData: (transactions: Transaction[], goals: Goal[]) => void
+  addGoal: (goal: Goal) => void
+  updateGoal: (goal: Goal) => void
+  removeGoal: (id: string) => void
   dismissStorageError: () => void
 }
 
@@ -84,7 +91,25 @@ export function CalendarProvider({ children, initialToday }: CalendarProviderPro
   // which day counts as today mid-interaction.
   const [today] = useState(() => initialToday ?? todayDate())
 
-  const [transactions, setTransactions] = useState<Transaction[]>([])
+  // Transactions and goals are one state value, not two, because they persist
+  // together in one storage record. Two separate `useState`s would need a
+  // write to happen as a side effect of one setter reading the other's
+  // current value — exactly the nested-setState-inside-an-updater shape that
+  // produced duplicate goals under React's Strict Mode double-invoke.
+  const [data, setData] = useState<{ transactions: Transaction[]; goals: Goal[] }>({
+    transactions: [],
+    goals: [],
+  })
+  const { transactions, goals } = data
+  // Mirrors `data` outside render, so `persist` can compute the next value
+  // and write it in one pass without a functional updater. Refs cannot be
+  // written during render, so this is kept current by an effect instead —
+  // safe here because every caller of `persist` runs from an event handler,
+  // which always fires after the effect for the render it saw has committed.
+  const dataRef = useRef(data)
+  useEffect(() => {
+    dataRef.current = data
+  }, [data])
   const [loading, setLoading] = useState(true)
   const [storageError, setStorageError] = useState<string>()
   const [visibleMonth, setVisibleMonth] = useState<IsoDate>(today)
@@ -95,8 +120,10 @@ export function CalendarProvider({ children, initialToday }: CalendarProviderPro
   // happen during render or in the initial state.
   useEffect(() => {
     const stored = loadData()
+    const loaded = { transactions: stored.transactions, goals: stored.goals }
+    dataRef.current = loaded
     startTransition(() => {
-      setTransactions(stored.transactions)
+      setData(loaded)
       setLoading(false)
     })
   }, [])
@@ -132,21 +159,35 @@ export function CalendarProvider({ children, initialToday }: CalendarProviderPro
   }, [transactions, selectedDate])
 
   /**
-   * Applies a change to the transaction list and persists the result.
+   * Applies changes to the transaction and goal lists and persists the
+   * result together — they live in one storage record, so a write always
+   * carries both.
    *
-   * Takes an updater rather than a finished array so the actions below stay
-   * referentially stable without reading state during render. Persistence is
-   * driven by these actions, not by an effect watching state, so navigating
-   * months never triggers a write.
+   * Takes updaters rather than finished arrays so the actions below stay
+   * referentially stable without reading state during render. Reads the
+   * current value from `dataRef` rather than a `setData` functional updater,
+   * and writes as a plain statement after — not nested inside the updater.
+   * React (in Strict Mode) invokes a state updater twice to check it is
+   * pure, and a write nested inside one fires twice too, which is what
+   * previously produced a duplicate goal on every add.
    */
-  const persist = useCallback((update: (current: Transaction[]) => Transaction[]) => {
-    setTransactions((current) => {
-      const next = update(current)
-      const result = saveTransactions(next)
+  const persist = useCallback(
+    (
+      updateTransactions: (current: Transaction[]) => Transaction[],
+      updateGoals: (current: Goal[]) => Goal[] = (current) => current
+    ) => {
+      const next = {
+        transactions: updateTransactions(dataRef.current.transactions),
+        goals: updateGoals(dataRef.current.goals),
+      }
+      dataRef.current = next
+      setData(next)
+
+      const result = saveTransactions(next.transactions, next.goals)
       setStorageError(result.ok ? undefined : result.reason)
-      return next
-    })
-  }, [])
+    },
+    []
+  )
 
   const addTransaction = useCallback(
     (transaction: Transaction) => {
@@ -178,6 +219,46 @@ export function CalendarProvider({ children, initialToday }: CalendarProviderPro
     [persist]
   )
 
+  const replaceAllData = useCallback(
+    (nextTransactions: Transaction[], nextGoals: Goal[]) => {
+      persist(
+        () => nextTransactions,
+        () => nextGoals
+      )
+    },
+    [persist]
+  )
+
+  const addGoal = useCallback(
+    (goal: Goal) => {
+      persist(
+        (current) => current,
+        (current) => [...current, goal]
+      )
+    },
+    [persist]
+  )
+
+  const updateGoal = useCallback(
+    (goal: Goal) => {
+      persist(
+        (current) => current,
+        (current) => current.map((existing) => (existing.id === goal.id ? goal : existing))
+      )
+    },
+    [persist]
+  )
+
+  const removeGoal = useCallback(
+    (id: string) => {
+      persist(
+        (current) => current,
+        (current) => current.filter((existing) => existing.id !== id)
+      )
+    },
+    [persist]
+  )
+
   const goToMonth = useCallback((date: IsoDate) => setVisibleMonth(date), [])
 
   const goToPreviousMonth = useCallback(() => {
@@ -196,6 +277,7 @@ export function CalendarProvider({ children, initialToday }: CalendarProviderPro
   const value = useMemo<CalendarContextValue>(
     () => ({
       transactions,
+      goals,
       occurrences,
       visibleMonth,
       monthRange,
@@ -213,10 +295,15 @@ export function CalendarProvider({ children, initialToday }: CalendarProviderPro
       updateTransaction,
       removeTransaction,
       replaceAll,
+      replaceAllData,
+      addGoal,
+      updateGoal,
+      removeGoal,
       dismissStorageError: () => setStorageError(undefined),
     }),
     [
       transactions,
+      goals,
       occurrences,
       visibleMonth,
       monthRange,
@@ -233,6 +320,10 @@ export function CalendarProvider({ children, initialToday }: CalendarProviderPro
       updateTransaction,
       removeTransaction,
       replaceAll,
+      replaceAllData,
+      addGoal,
+      updateGoal,
+      removeGoal,
     ]
   )
 

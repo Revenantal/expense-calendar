@@ -40,10 +40,7 @@ export function DayDetailPanel({ onAdd, onEdit, onDelete }: DayDetailPanelProps)
   )
 
   return (
-    <section
-      aria-label="Day detail"
-      className="flex min-h-0 flex-1 flex-col gap-2 rounded-2xl bg-panel p-4"
-    >
+    <section aria-label="Day detail" className="flex flex-col gap-2 rounded-2xl bg-panel p-4">
       <header className="flex items-start justify-between gap-2">
         <div>
           <h2 className="font-display text-[13px] font-medium text-ink">
@@ -83,7 +80,7 @@ export function DayDetailPanel({ onAdd, onEdit, onDelete }: DayDetailPanelProps)
       {onDay.length === 0 ? (
         <p className="text-[12px] text-muted">Nothing scheduled.</p>
       ) : (
-        <ul className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto">
+        <ul className="flex flex-col gap-1.5">
           {onDay.map((occurrence, index) => {
             const transaction = byId.get(occurrence.transactionId)
             if (!transaction) return null
@@ -99,13 +96,17 @@ export function DayDetailPanel({ onAdd, onEdit, onDelete }: DayDetailPanelProps)
                       <span
                         aria-hidden="true"
                         className={`size-1.5 shrink-0 rounded-full ${
-                          occurrence.kind === 'income' ? 'bg-income' : 'bg-expense'
+                          occurrence.goalId
+                            ? 'bg-goal'
+                            : occurrence.kind === 'income'
+                              ? 'bg-income'
+                              : 'bg-expense'
                         }`}
                       />
                       <span className="truncate">{occurrence.label}</span>
                     </p>
                     <p className="mt-0.5 text-[10px] text-muted">
-                      {describeRule(transaction.rule)}
+                      {occurrence.goalId ? 'Goal contribution' : describeRule(transaction.rule)}
                       {occurrence.displacement && (
                         <span className="text-holiday-muted">
                           {' · '}
@@ -119,10 +120,14 @@ export function DayDetailPanel({ onAdd, onEdit, onDelete }: DayDetailPanelProps)
                   <div className="flex shrink-0 items-center gap-1">
                     <span
                       className={`text-[12px] tabular-nums ${
-                        occurrence.kind === 'income' ? 'text-income' : 'text-expense'
+                        occurrence.goalId
+                          ? 'text-goal'
+                          : occurrence.kind === 'income'
+                            ? 'text-income'
+                            : 'text-expense'
                       }`}
                     >
-                      {occurrence.kind === 'income' ? '+' : '−'}
+                      {!occurrence.goalId && (occurrence.kind === 'income' ? '+' : '−')}
                       {formatMoney(occurrence.amountCents)}
                     </span>
                   </div>
