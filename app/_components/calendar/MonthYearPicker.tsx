@@ -53,16 +53,18 @@ export function MonthYearPicker({ visibleMonth, onSelect }: MonthYearPickerProps
 
   return (
     <div ref={containerRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((current) => !current)}
-        aria-haspopup="true"
-        aria-expanded={open}
-        className="flex items-center gap-1 rounded-lg px-1 py-0.5 font-display text-xl font-medium text-ink transition-colors hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      >
-        {formatMonthHeading(visibleMonth)}
-        <ChevronDown aria-hidden="true" size={16} className="text-muted" />
-      </button>
+      <h2 className="contents">
+        <button
+          type="button"
+          onClick={() => setOpen((current) => !current)}
+          aria-haspopup="true"
+          aria-expanded={open}
+          className="flex items-center gap-1 rounded-lg px-1 py-0.5 font-display text-xl font-medium text-ink transition-colors hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          {formatMonthHeading(visibleMonth)}
+          <ChevronDown aria-hidden="true" size={16} className="text-muted" />
+        </button>
+      </h2>
 
       {open && (
         <div

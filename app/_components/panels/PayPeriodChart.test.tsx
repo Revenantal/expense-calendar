@@ -19,7 +19,7 @@ describe('PayPeriodChart', () => {
 
   it('describes itself for screen readers', () => {
     render(<PayPeriodChart days={days} today="2026-03-01" />)
-    expect(screen.getByRole('img', { name: /daily income and expenses/i })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /daily net of income and expenses/i })).toBeInTheDocument()
   })
 
   it('keeps a slot for every day, including quiet ones', () => {
@@ -28,22 +28,19 @@ describe('PayPeriodChart', () => {
     expect(container.querySelectorAll('svg > g')).toHaveLength(4)
   })
 
-  it('draws income above the baseline and expenses below', () => {
+  it('draws a positive net day in income colour and a negative one in expense colour', () => {
     const { container } = render(<PayPeriodChart days={days} today="2026-03-01" />)
-    const bars = [...container.querySelectorAll('rect')].filter((rect) =>
+    const incomeBars = [...container.querySelectorAll('rect')].filter((rect) =>
       rect.getAttribute('fill')?.includes('color-income')
     )
-    const expenses = [...container.querySelectorAll('rect')].filter((rect) =>
+    const expenseBars = [...container.querySelectorAll('rect')].filter((rect) =>
       rect.getAttribute('fill')?.includes('color-expense')
     )
 
-    expect(bars).toHaveLength(1)
-    expect(expenses).toHaveLength(2)
-
-    // The income bar's top edge sits above the zero line; expenses start at it.
-    const zero = 10 + (132 - 10 - 16) / 2
-    expect(Number(bars[0].getAttribute('y'))).toBeLessThan(zero)
-    expect(Number(expenses[0].getAttribute('y'))).toBe(zero)
+    // Day 1: net +250,000 (income colour). Days 2 and 4: net negative (expense colour).
+    // Day 3 has no activity, so it draws no bar at all.
+    expect(incomeBars).toHaveLength(1)
+    expect(expenseBars).toHaveLength(2)
   })
 
   it('states the scale', () => {
@@ -51,22 +48,22 @@ describe('PayPeriodChart', () => {
     expect(screen.getByText(/scale \$2,500/)).toBeInTheDocument()
   })
 
-  it('draws both arms on one scale, so heights are comparable', () => {
-    // 22,000 against a 250,000 peak is 8.8% of the arm. Sharing the scale is
-    // what makes a bill readable as a fraction of the pay it comes out of.
+  it('scales every bar against the same peak, so heights are comparable', () => {
+    // 22,000 against a 250,000 peak is 8.8% of the plot height. Sharing the
+    // scale is what makes a bill readable as a fraction of the pay it comes out of.
     const { container } = render(<PayPeriodChart days={days} today="2026-03-01" />)
-    const armHeight = (132 - 10 - 16) / 2
+    const plotHeight = 132 - 10 - 16
 
-    const income = [...container.querySelectorAll('rect')].find((rect) =>
+    const incomeBar = [...container.querySelectorAll('rect')].find((rect) =>
       rect.getAttribute('fill')?.includes('color-income')
     )
-    const expenses = [...container.querySelectorAll('rect')].filter((rect) =>
+    const expenseBars = [...container.querySelectorAll('rect')].filter((rect) =>
       rect.getAttribute('fill')?.includes('color-expense')
     )
-    const tallestExpense = Math.max(...expenses.map((r) => Number(r.getAttribute('height'))))
+    const tallestExpense = Math.max(...expenseBars.map((r) => Number(r.getAttribute('height'))))
 
-    expect(Number(income!.getAttribute('height'))).toBeCloseTo(armHeight, 5)
-    expect(tallestExpense).toBeCloseTo((22_000 / 250_000) * armHeight, 5)
+    expect(Number(incomeBar!.getAttribute('height'))).toBeCloseTo(plotHeight, 5)
+    expect(tallestExpense).toBeCloseTo((22_000 / 250_000) * plotHeight, 5)
   })
 
   it('draws a bill at half height against double the income', () => {
