@@ -74,7 +74,7 @@ export function ScopePrompt({
         role="dialog"
         aria-modal="true"
         aria-labelledby="scope-prompt-title"
-        className="w-full max-w-sm rounded-lg border border-line bg-raised p-4 shadow-overlay"
+        className="w-full max-w-sm rounded-2xl bg-raised p-5 shadow-overlay"
       >
         <h2 id="scope-prompt-title" className="font-display text-[15px] font-medium text-ink">
           {verb} which occurrences?
@@ -92,7 +92,7 @@ export function ScopePrompt({
               key={option.scope}
               type="button"
               onClick={() => onChoose(option.scope)}
-              className="rounded border border-line px-3 py-2 text-left transition-colors hover:bg-line focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
+              className="rounded-xl bg-surface px-3.5 py-2.5 text-left transition-colors hover:bg-line focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
             >
               <span className="block text-[13px] text-ink">{option.label}</span>
               <span className="block text-[11px] text-muted">{option.detail}</span>
@@ -103,7 +103,7 @@ export function ScopePrompt({
         <button
           type="button"
           onClick={onCancel}
-          className="mt-3 w-full rounded px-3 py-2 text-[13px] text-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
+          className="mt-3 w-full rounded-lg px-3 py-2 text-[13px] text-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
         >
           Cancel
         </button>

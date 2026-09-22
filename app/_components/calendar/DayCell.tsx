@@ -20,8 +20,8 @@ type DayCellProps = {
   day: CalendarDay
   occurrences: Occurrence[]
   isSelected: boolean
-  /** Where this day sits in the selected pay period, if inside one. */
-  periodPosition?: 'start' | 'inside' | 'end'
+  /** Whether this day falls inside the selected pay period. */
+  inPeriod: boolean
   onSelect: (date: string) => void
   onContextMenu: (date: string, position: { x: number; y: number }) => void
 }
@@ -37,7 +37,7 @@ export function DayCell({
   day,
   occurrences,
   isSelected,
-  periodPosition,
+  inPeriod,
   onSelect,
   onContextMenu,
 }: DayCellProps) {
@@ -66,33 +66,23 @@ export function DayCell({
         }
       }}
       className={[
-        'relative flex h-full min-h-0 cursor-pointer flex-col gap-1 overflow-hidden border-r border-b border-line p-1.5 text-left transition-colors',
+        'relative flex h-full min-h-0 cursor-pointer flex-col gap-1 overflow-hidden rounded-2xl p-2 text-left transition-colors',
         'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
-        day.inMonth ? 'bg-panel hover:bg-raised' : 'bg-surface',
-        periodPosition && 'bg-accent/5',
-        isSelected && 'ring-1 ring-accent ring-inset',
+        day.inMonth ? 'bg-panel hover:bg-raised' : 'bg-transparent opacity-35',
+        isSelected && 'shadow-[inset_0_0_0_2px_var(--color-accent)]',
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      {/* A rail along the top edge marks the pay period. It runs unbroken
-          across the days in the span, with the ends capped, so the duration
-          reads as one stretch rather than a set of tinted cells. */}
-      {periodPosition && (
-        <span
-          aria-hidden="true"
-          className={[
-            'absolute top-0 h-0.75 bg-accent',
-            periodPosition === 'start' && 'left-1 right-0 rounded-l-full',
-            periodPosition === 'end' && 'left-0 right-1 rounded-r-full',
-            periodPosition === 'inside' && 'left-0 right-0',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        />
+      {/* A wash on top of the cell background, not a competing background
+          class — so it layers with the selection ring instead of fighting it
+          for which colour wins. A day can be in the selected period without
+          being the selected day. */}
+      {inPeriod && (
+        <span aria-hidden="true" className="absolute inset-0 rounded-2xl bg-accent/10" />
       )}
 
-      <div className="flex items-baseline justify-between gap-1">
+      <div className="relative flex items-baseline justify-between gap-1">
         <span
           className={[
             'text-[13px] leading-none font-medium tabular-nums',
@@ -148,8 +138,8 @@ export function DayCell({
               // A tinted pill rather than a bullet: the fill carries the
               // income/expense distinction across the full width, so the
               // amount has somewhere to sit at the right edge.
-              className={`flex items-center justify-between gap-1 rounded-sm px-1 py-0.5 text-[11px] leading-tight ${
-                isIncome ? 'bg-income/15' : 'bg-expense/15'
+              className={`flex items-center justify-between gap-1 rounded-full px-2 py-0.5 text-[11px] leading-tight ${
+                isIncome ? 'bg-income/18' : 'bg-expense/18'
               } ${day.isPast ? 'opacity-55' : ''}`}
             >
               {/* The amount never truncates — it is the number being read.

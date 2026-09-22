@@ -42,7 +42,7 @@ export function DayDetailPanel({ onAdd, onEdit, onDelete }: DayDetailPanelProps)
   return (
     <section
       aria-label="Day detail"
-      className="flex min-h-0 flex-1 flex-col gap-2 rounded border border-line bg-panel p-3"
+      className="flex min-h-0 flex-1 flex-col gap-2 rounded-2xl bg-panel p-4"
     >
       <header className="flex items-start justify-between gap-2">
         <div>
@@ -67,7 +67,7 @@ export function DayDetailPanel({ onAdd, onEdit, onDelete }: DayDetailPanelProps)
         <button
           type="button"
           onClick={() => onAdd(selectedDate)}
-          className="flex shrink-0 items-center gap-1 rounded border border-line px-2 py-1 text-[11px] text-body transition-colors hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="flex shrink-0 items-center gap-1 rounded-lg bg-raised px-2.5 py-1 text-[11px] text-body transition-colors hover:bg-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           <Plus aria-hidden="true" size={12} />
           Add
@@ -91,7 +91,7 @@ export function DayDetailPanel({ onAdd, onEdit, onDelete }: DayDetailPanelProps)
             return (
               <li
                 key={`${occurrence.transactionId}-${occurrence.scheduledDate}-${index}`}
-                className="rounded border border-line bg-surface p-2"
+                className="rounded-xl bg-surface p-2.5"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">

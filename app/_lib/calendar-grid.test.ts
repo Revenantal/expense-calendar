@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildMonthGrid,
   formatFullDate,
+  formatMonthDay,
   formatMonthHeading,
   formatShortDate,
   groupByDate,
@@ -139,11 +140,16 @@ describe('formatting', () => {
     expect(formatShortDate('2026-03-15', 'en-GB')).toBe('Sun 15 Mar')
   })
 
+  it('formats a date without a weekday', () => {
+    expect(formatMonthDay('2026-11-03', 'en-US')).toBe('Nov 3')
+  })
+
   it('does not shift the date into the previous day', () => {
     // Formatters build UTC instants, so without timeZone: 'UTC' these would
     // render a day earlier anywhere west of UTC.
     expect(formatFullDate('2026-03-01', 'en-GB')).toContain('1 March')
     expect(formatShortDate('2026-01-01', 'en-GB')).toContain('1 Jan')
+    expect(formatMonthDay('2026-01-01', 'en-US')).toContain('1')
     expect(formatMonthHeading('2026-01-01', 'en-CA')).toBe('January 2026')
   })
 })

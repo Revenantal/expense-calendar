@@ -36,7 +36,7 @@ const MONTH_NAMES = [
 ]
 
 const fieldClass =
-  'rounded border border-line bg-surface px-2 py-1.5 text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent'
+  'rounded-lg bg-surface px-2.5 py-1.5 text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent'
 
 /**
  * Inputs for a recurrence rule, switching on the selected type.

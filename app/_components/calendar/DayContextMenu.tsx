@@ -54,7 +54,7 @@ export function DayContextMenu({ date, position, onAddTransaction, onClose }: Da
       role="menu"
       aria-label={`Actions for ${formatShortDate(date)}`}
       style={{ left, top }}
-      className="fixed z-50 min-w-[200px] rounded-md border border-line bg-raised py-1 shadow-overlay"
+      className="fixed z-50 min-w-[200px] rounded-2xl bg-raised py-1.5 shadow-overlay"
     >
       <p className="px-3 py-1.5 text-[11px] text-muted">{formatShortDate(date)}</p>
 
@@ -65,7 +65,7 @@ export function DayContextMenu({ date, position, onAddTransaction, onClose }: Da
           onAddTransaction(date)
           onClose()
         }}
-        className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-body hover:bg-line focus-visible:bg-line focus-visible:outline-none"
+        className="mx-1.5 flex w-[calc(100%-0.75rem)] items-center gap-2 rounded-xl px-3 py-2 text-left text-[13px] text-body hover:bg-line focus-visible:bg-line focus-visible:outline-none"
       >
         <Plus aria-hidden="true" size={14} />
         Add transaction

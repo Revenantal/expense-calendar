@@ -66,7 +66,7 @@ export function DataControls() {
       <button
         type="button"
         onClick={handleExport}
-        className="flex items-center gap-1 rounded border border-line px-2 py-1 text-[11px] text-body transition-colors hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className="flex items-center gap-1 rounded-lg bg-panel px-2.5 py-1.5 text-[11px] text-body transition-colors hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <Download aria-hidden="true" size={12} />
         Export
@@ -75,7 +75,7 @@ export function DataControls() {
       <button
         type="button"
         onClick={() => fileRef.current?.click()}
-        className="flex items-center gap-1 rounded border border-line px-2 py-1 text-[11px] text-body transition-colors hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className="flex items-center gap-1 rounded-lg bg-panel px-2.5 py-1.5 text-[11px] text-body transition-colors hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <Upload aria-hidden="true" size={12} />
         Import

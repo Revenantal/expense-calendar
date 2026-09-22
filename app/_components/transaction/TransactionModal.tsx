@@ -30,7 +30,7 @@ type TransactionModalProps = {
 }
 
 const fieldClass =
-  'rounded border border-line bg-surface px-2 py-1.5 text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent'
+  'rounded-lg bg-surface px-2.5 py-1.5 text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent'
 
 /**
  * Form for adding or editing a transaction.
@@ -127,9 +127,9 @@ export function TransactionModal({ date, existing, onSave, onClose }: Transactio
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="max-h-full w-full max-w-md overflow-y-auto rounded-lg border border-line bg-raised shadow-overlay"
+        className="max-h-full w-full max-w-md overflow-y-auto rounded-2xl bg-raised shadow-overlay"
       >
-        <header className="flex items-center justify-between gap-4 border-b border-line px-4 py-3">
+        <header className="flex items-center justify-between gap-4 px-5 py-4">
           <h2 id={titleId} className="font-display text-[15px] font-medium text-ink">
             {existing ? 'Edit transaction' : 'Add transaction'}
             <span className="ml-2 text-[12px] font-normal text-muted">{formatShortDate(date)}</span>
@@ -139,22 +139,20 @@ export function TransactionModal({ date, existing, onSave, onClose }: Transactio
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded p-1 text-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
+            className="rounded-lg p-1.5 text-muted transition-colors hover:bg-line hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
           >
             <X aria-hidden="true" size={16} />
           </button>
         </header>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3 p-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3 p-5">
           <fieldset className="flex gap-2">
             <legend className="sr-only">Type</legend>
             {(['expense', 'income'] as const).map((option) => (
               <label
                 key={option}
-                className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded border px-3 py-2 text-[13px] capitalize transition-colors ${
-                  kind === option
-                    ? 'border-accent bg-accent/10 text-ink'
-                    : 'border-line text-muted hover:text-ink'
+                className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-[13px] capitalize transition-colors ${
+                  kind === option ? 'bg-accent/15 text-ink' : 'bg-surface text-muted hover:text-ink'
                 }`}
               >
                 <input
@@ -258,13 +256,13 @@ export function TransactionModal({ date, existing, onSave, onClose }: Transactio
             <button
               type="button"
               onClick={onClose}
-              className="rounded px-3 py-2 text-[13px] text-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
+              className="rounded-lg px-3 py-2 text-[13px] text-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded bg-accent px-4 py-2 text-[13px] font-medium text-surface transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              className="rounded-lg bg-accent px-4 py-2 text-[13px] font-medium text-surface transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               {existing ? 'Save changes' : 'Add transaction'}
             </button>

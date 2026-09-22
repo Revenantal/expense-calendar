@@ -141,3 +141,21 @@ export function formatShortDate(date: IsoDate, locale?: string): string {
   })
   return formatter.format(new Date(Date.UTC(year, month - 1, day)))
 }
+
+/**
+ * Formats a date without a weekday, for prose that already reads as a
+ * sentence, such as "positive through Nov 3".
+ *
+ * @param date - Date to format.
+ * @param locale - Locale to format for. Defaults to the browser's.
+ * @returns A date such as `Nov 3`.
+ */
+export function formatMonthDay(date: IsoDate, locale?: string): string {
+  const { year, month, day } = toParts(date)
+  const formatter = new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  })
+  return formatter.format(new Date(Date.UTC(year, month - 1, day)))
+}

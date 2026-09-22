@@ -251,11 +251,11 @@ describe('selection', () => {
 })
 
 describe('pay period span', () => {
-  /** Counts cells carrying the period rail. */
-  function railCells() {
+  /** Counts cells carrying the period wash overlay. */
+  function washedCells() {
     return screen
       .getAllByRole('gridcell')
-      .filter((cell) => cell.querySelector('span.bg-accent[aria-hidden="true"]'))
+      .filter((cell) => cell.querySelector('span.bg-accent\\/10[aria-hidden="true"]'))
       .map((cell) => cell.dataset.date)
   }
 
@@ -264,7 +264,7 @@ describe('pay period span', () => {
     await screen.findAllByRole('gridcell')
 
     // Today is 2026-03-15, so the period runs the 15th to the 31st.
-    const marked = railCells()
+    const marked = washedCells()
     expect(marked).toContain('2026-03-15')
     expect(marked).toContain('2026-03-20')
     expect(marked).toContain('2026-03-31')
@@ -278,7 +278,7 @@ describe('pay period span', () => {
     const cells = await screen.findAllByRole('gridcell')
     await user.click(cells.find((element) => element.dataset.date === '2026-03-05')!)
 
-    const marked = railCells()
+    const marked = washedCells()
     expect(marked).toContain('2026-03-01')
     expect(marked).toContain('2026-03-14')
     expect(marked).not.toContain('2026-03-15')
@@ -288,7 +288,7 @@ describe('pay period span', () => {
     renderGrid([rent])
     await screen.findAllByRole('gridcell')
 
-    expect(railCells()).toHaveLength(0)
+    expect(washedCells()).toHaveLength(0)
   })
 })
 

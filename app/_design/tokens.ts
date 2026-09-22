@@ -165,6 +165,24 @@ export const borderTokens = {
   },
 } as const satisfies Record<string, BorderToken>
 
+export const radiusTokens = {
+  pill: {
+    label: 'Pill',
+    value: '9999px',
+    usage: 'Chips, badges, and transaction pills inside a day cell.',
+  },
+  panel: {
+    label: 'Panel',
+    value: '1rem',
+    usage: 'Day cells and side panels — rounded-2xl.',
+  },
+  control: {
+    label: 'Control',
+    value: '0.5rem',
+    usage: 'Buttons, inputs, and nav controls — rounded-lg.',
+  },
+} as const satisfies Record<string, BorderToken>
+
 export const layoutTokens = {
   containerMaxWidth: '1280px',
   desktopEdgePadding: '40px',

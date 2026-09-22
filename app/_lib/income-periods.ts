@@ -113,6 +113,21 @@ export function periodContaining(paycheck: Transaction, date: IsoDate): IncomePe
 }
 
 /**
+ * Finds the period immediately before another.
+ *
+ * @param paycheck - Transaction marked as the paycheck.
+ * @param period - Period to find the predecessor of.
+ * @returns The previous period, or undefined when none precedes it.
+ */
+export function previousPeriod(
+  paycheck: Transaction,
+  period: IncomePeriod
+): IncomePeriod | undefined {
+  const dayBefore = addDays(period.start, -1)
+  return periodContaining(paycheck, dayBefore)
+}
+
+/**
  * Returns whether a period contains today.
  *
  * @param period - Period to test.

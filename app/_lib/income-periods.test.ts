@@ -6,6 +6,7 @@ import {
   findPaycheck,
   isCurrentPeriod,
   periodContaining,
+  previousPeriod,
   totalsForPeriod,
 } from './income-periods'
 import { expandAll } from './recurrence'
@@ -109,6 +110,18 @@ describe('periodContaining', () => {
 
   it('treats the day before a payday as the previous period', () => {
     expect(periodContaining(paycheck, '2026-03-14')?.start).toBe('2026-03-01')
+  })
+})
+
+describe('previousPeriod', () => {
+  it('finds the period immediately before another', () => {
+    const period = { start: '2026-03-15', end: '2026-03-31' }
+    expect(previousPeriod(paycheck, period)).toEqual({ start: '2026-03-01', end: '2026-03-14' })
+  })
+
+  it('crosses a month boundary', () => {
+    const period = { start: '2026-03-01', end: '2026-03-14' }
+    expect(previousPeriod(paycheck, period)).toEqual({ start: '2026-02-15', end: '2026-02-28' })
   })
 })
 

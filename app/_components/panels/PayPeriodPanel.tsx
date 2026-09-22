@@ -3,7 +3,13 @@
 import { useMemo } from 'react'
 
 import { formatShortDate } from '@/app/_lib/calendar-grid'
-import { buildPeriods, dailyTotals, findPaycheck, totalsForPeriod } from '@/app/_lib/income-periods'
+import {
+  buildPeriods,
+  dailyTotals,
+  findPaycheck,
+  previousPeriod,
+  totalsForPeriod,
+} from '@/app/_lib/income-periods'
 import { formatMoney } from '@/app/_lib/money'
 import { expandAll } from '@/app/_lib/recurrence'
 
@@ -38,6 +44,23 @@ export function PayPeriodPanel() {
     }
   }, [transactions, period, today])
 
+  // Compares this period's expenses to the one before it, so the panel shows
+  // whether spending is trending up or down, not just this period in
+  // isolation.
+  const expenseTrend = useMemo(() => {
+    if (!paycheck || !period || !totals) return undefined
+
+    const previous = previousPeriod(paycheck, period)
+    if (!previous) return undefined
+
+    const previousOccurrences = expandAll(transactions, previous.start, previous.end)
+    const previousTotals = totalsForPeriod(previousOccurrences, previous, today)
+    if (previousTotals.expenses === 0) return undefined
+
+    const change = (totals.expenses - previousTotals.expenses) / previousTotals.expenses
+    return Math.round(change * 100)
+  }, [paycheck, period, totals, transactions, today])
+
   if (!paycheck) {
     return (
       <PanelShell>
@@ -60,8 +83,18 @@ export function PayPeriodPanel() {
   return (
     <PanelShell>
       <p className="flex items-center justify-between gap-2 text-[11px] text-muted">
-        <span>
+        <span className="flex items-center gap-1.5">
           {formatShortDate(period.start)} — {formatShortDate(period.end)}
+          {expenseTrend !== undefined && expenseTrend !== 0 && (
+            <span
+              className={`shrink-0 rounded-full px-1.5 py-0.5 ${
+                expenseTrend > 0 ? 'bg-expense/15 text-expense' : 'bg-income/15 text-income'
+              }`}
+            >
+              {expenseTrend > 0 ? '+' : ''}
+              {expenseTrend}% vs last
+            </span>
+          )}
         </span>
         {/* Stated as a count because period lengths vary: a shifted paycheck
             moves the boundary, so two periods in the same month can differ. */}
@@ -113,7 +146,7 @@ function PanelShell({ children }: { children: React.ReactNode }) {
   return (
     <section
       aria-label="Pay period summary"
-      className="flex flex-col gap-2 rounded border border-line bg-panel p-3"
+      className="flex flex-col gap-2 rounded-2xl bg-panel p-4"
     >
       <h2 className="font-display text-[13px] font-medium text-ink">Pay period</h2>
       {children}

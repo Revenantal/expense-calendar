@@ -6,6 +6,7 @@ import { applyDelete, applyEdit, type EditScope } from '@/app/_lib/edit-scopes'
 import type { IsoDate, Occurrence, Transaction } from '@/app/_lib/types'
 
 import { DayDetailPanel } from '../panels/DayDetailPanel'
+import { ForecastPanel } from '../panels/ForecastPanel'
 import { PayPeriodPanel } from '../panels/PayPeriodPanel'
 import { ScopePrompt } from '../transaction/ScopePrompt'
 import { TransactionModal, type TransactionFormValues } from '../transaction/TransactionModal'
@@ -152,7 +153,7 @@ function CalendarLayout() {
       {storageError && (
         <div
           role="alert"
-          className="flex items-start justify-between gap-4 rounded border border-expense/40 bg-expense/10 px-3 py-2 text-[13px] text-ink"
+          className="flex items-start justify-between gap-4 rounded-2xl bg-expense/10 px-4 py-2.5 text-[13px] text-ink"
         >
           <span>{storageError}</span>
           <button
@@ -166,8 +167,11 @@ function CalendarLayout() {
       )}
 
       <div className="flex min-h-0 flex-1 gap-4">
-        <div className="min-w-0 flex-1">
-          <MonthGrid onAddTransaction={(date) => setModal({ mode: 'add', date })} />
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <div className="min-h-0 flex-1">
+            <MonthGrid onAddTransaction={(date) => setModal({ mode: 'add', date })} />
+          </div>
+          <ForecastPanel />
         </div>
 
         <aside

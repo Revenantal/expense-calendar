@@ -21,20 +21,14 @@ type MonthGridProps = {
 }
 
 /**
- * Places a day within the selected pay period, for the span marker.
+ * Whether a day falls inside the selected pay period, for the wash overlay.
  *
- * @param date - Day to place.
+ * @param date - Day to test.
  * @param period - Selected pay period, if any.
- * @returns Where the day sits, or undefined when outside the period.
+ * @returns True when the day is within the period's bounds.
  */
-function periodPositionFor(
-  date: IsoDate,
-  period?: { start: IsoDate; end: IsoDate }
-): 'start' | 'inside' | 'end' | undefined {
-  if (!period || date < period.start || date > period.end) return undefined
-  if (date === period.start) return 'start'
-  if (date === period.end) return 'end'
-  return 'inside'
+function isInPeriod(date: IsoDate, period?: { start: IsoDate; end: IsoDate }): boolean {
+  return period !== undefined && date >= period.start && date <= period.end
 }
 
 /** Arrow keys move by a day or a week; Home and End jump within the week. */
@@ -107,36 +101,36 @@ export function MonthGrid({ onAddTransaction }: MonthGridProps) {
           {formatMonthHeading(visibleMonth)}
         </h2>
 
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={goToToday}
-            className="rounded border border-line px-2.5 py-1 text-[12px] text-body transition-colors hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          >
-            Today
-          </button>
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={goToPreviousMonth}
             aria-label="Previous month"
-            className="rounded border border-line p-1.5 text-body transition-colors hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            className="rounded-lg bg-panel p-1.5 text-body transition-colors hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             <ChevronLeft aria-hidden="true" size={16} />
           </button>
           <button
             type="button"
+            onClick={goToToday}
+            className="rounded-lg bg-panel px-3.5 py-1.5 text-[12px] text-body transition-colors hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          >
+            Today
+          </button>
+          <button
+            type="button"
             onClick={goToNextMonth}
             aria-label="Next month"
-            className="rounded border border-line p-1.5 text-body transition-colors hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            className="rounded-lg bg-panel p-1.5 text-body transition-colors hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             <ChevronRight aria-hidden="true" size={16} />
           </button>
         </div>
       </header>
 
-      <div className="grid shrink-0 grid-cols-7 border-t border-l border-line text-[11px] text-muted">
+      <div className="grid shrink-0 grid-cols-7 gap-1.5 text-[10px] tracking-wide text-muted uppercase">
         {WEEKDAY_LABELS.map((label) => (
-          <div key={label} className="border-r border-b border-line px-1.5 py-1 font-medium">
+          <div key={label} className="px-1.5 py-1 text-center font-medium">
             {label}
           </div>
         ))}
@@ -146,7 +140,7 @@ export function MonthGrid({ onAddTransaction }: MonthGridProps) {
         role="grid"
         aria-label={formatMonthHeading(visibleMonth)}
         onKeyDown={handleKeyDown}
-        className="grid min-h-0 flex-1 auto-rows-fr grid-cols-7 border-t border-l border-line"
+        className="grid min-h-0 flex-1 auto-rows-fr grid-cols-7 gap-1.5"
       >
         {days.map((day) => (
           <DayCell
@@ -154,7 +148,7 @@ export function MonthGrid({ onAddTransaction }: MonthGridProps) {
             day={day}
             occurrences={byDate.get(day.date) ?? []}
             isSelected={day.date === selectedDate}
-            periodPosition={periodPositionFor(day.date, selectedPeriod)}
+            inPeriod={isInPeriod(day.date, selectedPeriod)}
             onSelect={selectDate}
             onContextMenu={(date, position) => setMenu({ date, position })}
           />
