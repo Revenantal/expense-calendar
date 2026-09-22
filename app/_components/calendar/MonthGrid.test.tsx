@@ -118,7 +118,7 @@ describe('day cells', () => {
     )
 
     // 250,000 income less 150,000 rent leaves 1,000.00 positive.
-    expect(within(cell!).getByText(/\+1,000\.00/)).toBeInTheDocument()
+    expect(within(cell!).getByText(/\+\$1,000\.00/)).toBeInTheDocument()
   })
 
   it('shows each transaction amount in full', async () => {
@@ -128,8 +128,8 @@ describe('day cells', () => {
       (element) => element.dataset.date === '2026-03-01'
     )
 
-    expect(within(cell!).getByText('1,500.00')).toBeInTheDocument()
-    expect(within(cell!).getByText('2,500.00')).toBeInTheDocument()
+    expect(within(cell!).getByText('$1,500.00')).toBeInTheDocument()
+    expect(within(cell!).getByText('$2,500.00')).toBeInTheDocument()
   })
 
   it('fills trailing days borrowed from the next month', async () => {

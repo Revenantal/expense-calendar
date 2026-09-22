@@ -4,7 +4,7 @@ import { useId, useState } from 'react'
 
 import { formatShortDate } from '@/app/_lib/calendar-grid'
 import { toParts } from '@/app/_lib/dates'
-import { formatAmount } from '@/app/_lib/money'
+import { formatMoney } from '@/app/_lib/money'
 import type { IsoDate } from '@/app/_lib/types'
 
 /** One day's income and expenses, in cents. */
@@ -146,21 +146,21 @@ export function PayPeriodChart({ days, today }: PayPeriodChartProps) {
         <span>
           Day {dayNumber(days[0].date)}–{dayNumber(days[days.length - 1].date)}
         </span>
-        <span>scale {formatAmount(peak)}</span>
+        <span>scale {formatMoney(peak)}</span>
       </div>
 
       <figcaption
         aria-live="polite"
-        className="min-h-8.5 rounded border border-line bg-surface px-2 py-1 text-[11px]"
+        className="min-h-8.5 rounded-xl bg-surface px-2.5 py-1 text-[11px]"
       >
         {active ? (
           <>
             <span className="text-body">{formatShortDate(active.date)}</span>
             <span className="ml-2 text-income">
-              {active.income > 0 ? `+${formatAmount(active.income)}` : '—'}
+              {active.income > 0 ? `+${formatMoney(active.income)}` : '—'}
             </span>
             <span className="ml-2 text-expense">
-              {active.expenses > 0 ? `−${formatAmount(active.expenses)}` : '—'}
+              {active.expenses > 0 ? `−${formatMoney(active.expenses)}` : '—'}
             </span>
           </>
         ) : (

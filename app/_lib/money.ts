@@ -62,15 +62,18 @@ export function toDecimalString(cents: number): string {
 /**
  * Formats cents as currency for display.
  *
+ * Builds a plain `$` prefix onto a locale-formatted number rather than
+ * asking `Intl` for currency style: `style: 'currency'` with `CAD` renders as
+ * `CA$` in every locale except `en-CA`, which would show wrong for the
+ * overwhelming majority of browsers. Digit grouping and decimals still come
+ * from `Intl`, since those vary correctly by locale.
+ *
  * @param cents - Amount in cents.
  * @param locale - Locale to format for. Defaults to the browser's.
  * @returns A formatted string such as `$12.34`.
  */
 export function formatMoney(cents: number, locale?: string): string {
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: CURRENCY,
-  }).format(cents / MINOR_UNITS)
+  return `$${formatAmount(cents, locale)}`
 }
 
 /**
@@ -87,11 +90,8 @@ export function formatSignedMoney(cents: number, locale?: string): string {
 }
 
 /**
- * Formats cents without a currency symbol, for dense places like day cells.
- *
- * The symbol is dropped rather than stripped from a formatted string: `CAD`
- * renders as `CA$` in some locales, so a regex looking for a bare `$` would
- * silently leave it in place.
+ * Formats cents as a plain decimal number, with digit grouping but no
+ * currency symbol.
  *
  * @param cents - Amount in cents.
  * @param locale - Locale to format for. Defaults to the browser's.

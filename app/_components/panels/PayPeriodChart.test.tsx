@@ -48,7 +48,7 @@ describe('PayPeriodChart', () => {
 
   it('states the scale', () => {
     render(<PayPeriodChart days={days} today="2026-03-01" />)
-    expect(screen.getByText(/scale 2,500\.00/)).toBeInTheDocument()
+    expect(screen.getByText(/scale \$2,500\.00/)).toBeInTheDocument()
   })
 
   it('draws both arms on one scale, so heights are comparable', () => {
@@ -100,6 +100,6 @@ describe('PayPeriodChart', () => {
     )
     await user.hover(hitTargets[1])
 
-    expect(screen.getByText(/−60\.00/)).toBeInTheDocument()
+    expect(screen.getByText(/−\$60\.00/)).toBeInTheDocument()
   })
 })

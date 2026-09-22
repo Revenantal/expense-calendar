@@ -123,7 +123,7 @@ export function DayDetailPanel({ onAdd, onEdit, onDelete }: DayDetailPanelProps)
                       }`}
                     >
                       {occurrence.kind === 'income' ? '+' : '−'}
-                      {formatMoney(occurrence.amountCents).replace(/^[^\d]*/, '')}
+                      {formatMoney(occurrence.amountCents)}
                     </span>
                   </div>
                 </div>

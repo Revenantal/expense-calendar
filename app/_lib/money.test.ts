@@ -81,7 +81,7 @@ describe('toDecimalString', () => {
 })
 
 describe('formatMoney', () => {
-  it('formats as Canadian currency', () => {
+  it('formats with a plain dollar sign', () => {
     // Locale pinned so the assertion does not depend on the test machine.
     expect(formatMoney(1234, 'en-CA')).toBe('$12.34')
     expect(formatMoney(0, 'en-CA')).toBe('$0.00')
@@ -90,12 +90,20 @@ describe('formatMoney', () => {
   it('groups thousands', () => {
     expect(formatMoney(123456789, 'en-CA')).toBe('$1,234,567.89')
   })
+
+  it('always shows a plain "$", never "CA$", regardless of locale', () => {
+    // Intl's currency style renders CAD as "CA$" in every locale except
+    // en-CA, which is wrong for the overwhelming majority of browsers.
+    // formatMoney must not depend on Intl for the symbol.
+    expect(formatMoney(1234, 'en-US')).toBe('$12.34')
+    expect(formatMoney(1234, 'en-GB')).toBe('$12.34')
+    // fr-CA still uses a comma decimal, but the symbol is always a plain $.
+    expect(formatMoney(1234, 'fr-CA')).toBe('$12,34')
+  })
 })
 
 describe('formatAmount', () => {
   it('omits the currency symbol entirely', () => {
-    // CAD renders as "CA$" in some locales, so stripping a bare "$" from a
-    // formatted string would leave "CA" behind.
     expect(formatAmount(100_000, 'en-CA')).toBe('1,000.00')
     expect(formatAmount(1234, 'en-CA')).toBe('12.34')
     expect(formatAmount(0, 'en-CA')).toBe('0.00')

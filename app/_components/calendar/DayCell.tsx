@@ -2,7 +2,7 @@
 
 import { toParts } from '@/app/_lib/dates'
 import { holidayOn } from '@/app/_lib/holidays'
-import { formatAmount } from '@/app/_lib/money'
+import { formatMoney } from '@/app/_lib/money'
 import { netTotal } from '@/app/_lib/calendar-grid'
 import type { CalendarDay } from '@/app/_lib/calendar-grid'
 import type { Occurrence } from '@/app/_lib/types'
@@ -105,7 +105,7 @@ export function DayCell({
               .filter(Boolean)
               .join(' ')}
           >
-            {`${net > 0 ? '+' : '−'}${formatAmount(Math.abs(net))}`}
+            {`${net > 0 ? '+' : '−'}${formatMoney(Math.abs(net))}`}
           </span>
         )}
       </div>
@@ -150,7 +150,7 @@ export function DayCell({
               <span
                 className={`shrink-0 tabular-nums ${isIncome ? 'text-income' : 'text-expense'}`}
               >
-                {formatAmount(occurrence.amountCents)}
+                {formatMoney(occurrence.amountCents)}
               </span>
             </li>
           )

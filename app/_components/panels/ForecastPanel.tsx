@@ -5,7 +5,7 @@ import { useMemo } from 'react'
 import { formatMonthDay } from '@/app/_lib/calendar-grid'
 import { addDays } from '@/app/_lib/dates'
 import { buildForecast } from '@/app/_lib/forecast'
-import { formatAmount } from '@/app/_lib/money'
+import { formatMoney } from '@/app/_lib/money'
 import { expandAll } from '@/app/_lib/recurrence'
 
 import { useCalendar } from '../calendar/CalendarProvider'
@@ -56,7 +56,7 @@ export function ForecastPanel() {
             about <b className="text-ink">{forecast.daysAhead} days</b> out. The largest draw before
             then is <b className="text-ink">{forecast.largestDraw.label}</b> on{' '}
             <b className="text-ink">{formatMonthDay(forecast.largestDraw.date)}</b> at{' '}
-            <b className="text-ink">{formatAmount(forecast.largestDraw.amountCents)}</b>.
+            <b className="text-ink">{formatMoney(forecast.largestDraw.amountCents)}</b>.
           </>
         )}
       </p>
