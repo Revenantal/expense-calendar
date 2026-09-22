@@ -2,7 +2,10 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+// `?? ` alone doesn't catch an empty string, which is exactly what an unset
+// but present Vercel env var evaluates to — that reached `new URL('')` and
+// crashed the build with "Invalid URL" rather than falling back.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
 const sans = Inter({
   variable: '--font-sans',
