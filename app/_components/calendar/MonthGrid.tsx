@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 import {
   WEEKDAY_LABELS,
@@ -15,6 +15,7 @@ import type { IsoDate } from '@/app/_lib/types'
 import { useCalendar } from './CalendarProvider'
 import { DayCell } from './DayCell'
 import { DayContextMenu } from './DayContextMenu'
+import { MonthYearPicker } from './MonthYearPicker'
 
 type MonthGridProps = {
   onAddTransaction: (date: IsoDate) => void
@@ -61,6 +62,23 @@ export function MonthGrid({ onAddTransaction }: MonthGridProps) {
   const days = useMemo(() => buildMonthGrid(visibleMonth, today), [visibleMonth, today])
   const byDate = useMemo(() => groupByDate(occurrences), [occurrences])
 
+  // Trackpads and wheels fire many small deltas per gesture; without a
+  // cooldown one scroll would flip through several months at once.
+  const scrollCooldown = useRef(false)
+
+  const handleWheel = (event: React.WheelEvent) => {
+    if (Math.abs(event.deltaY) < Math.abs(event.deltaX)) return
+    if (scrollCooldown.current) return
+
+    scrollCooldown.current = true
+    setTimeout(() => {
+      scrollCooldown.current = false
+    }, 350)
+
+    if (event.deltaY > 0) goToNextMonth()
+    else if (event.deltaY < 0) goToPreviousMonth()
+  }
+
   /** Moves the selection, following it into an adjacent month when needed. */
   const moveSelection = (offset: number) => {
     const next = addDays(selectedDate, offset)
@@ -95,11 +113,13 @@ export function MonthGrid({ onAddTransaction }: MonthGridProps) {
   }
 
   return (
-    <section aria-label="Month calendar" className="flex h-full min-h-0 flex-col gap-3">
+    <section
+      aria-label="Month calendar"
+      onWheel={handleWheel}
+      className="flex h-full min-h-0 flex-col gap-3"
+    >
       <header className="flex items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-medium text-ink">
-          {formatMonthHeading(visibleMonth)}
-        </h2>
+        <MonthYearPicker visibleMonth={visibleMonth} onSelect={goToMonth} />
 
         <div className="flex items-center gap-1.5">
           <button
