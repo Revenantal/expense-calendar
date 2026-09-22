@@ -28,12 +28,14 @@ const BAR_GAP = 2
 const CORNER = 4
 
 /**
- * Income above a centre baseline, expenses below, one column per day.
+ * One bar per day, net of income minus expenses, all growing up from a
+ * bottom baseline. Color alone carries the sign: blue for a day ahead, red
+ * for a day behind.
  *
- * A diverging bar is the right form because the reader's job is polarity —
- * money in against money out — rather than comparing categories. Every day in
- * the period gets a slot, including quiet ones, so the spacing reflects real
- * elapsed time.
+ * A single net bar is the right form because the reader's job is the day's
+ * outcome, not a breakdown of the two flows that produced it — that detail
+ * still lives in the hover caption. Every day in the period gets a slot,
+ * including quiet ones, so the spacing reflects real elapsed time.
  */
 export function PayPeriodChart({ days, today }: PayPeriodChartProps) {
   const titleId = useId()
@@ -42,20 +44,18 @@ export function PayPeriodChart({ days, today }: PayPeriodChartProps) {
   if (days.length === 0) return null
 
   const plotHeight = HEIGHT - TOP_PAD - BOTTOM_PAD
-  const zeroY = TOP_PAD + plotHeight / 2
-  const armHeight = plotHeight / 2
+  const baselineY = TOP_PAD + plotHeight
 
-  // One scale across both arms, so bar heights are directly comparable: a
-  // 1,400 bill against 3,600 income draws at roughly half the height. Scaling
-  // each arm to its own peak would make every expense look full-size relative
-  // to the largest expense, which hides how much of the pay each one consumes.
-  const peak = Math.max(...days.flatMap((day) => [day.income, day.expenses]), 1)
+  // Every bar grows from the same baseline, scaled against the largest net
+  // magnitude in the period, so a 300 net day draws at roughly half the
+  // height of a 600 net day regardless of sign.
+  const peak = Math.max(...days.map((day) => Math.abs(day.income - day.expenses)), 1)
 
   // Percentage geometry keeps the chart fluid without measuring the container.
   const slotWidth = 100 / days.length
   const barWidth = Math.min(slotWidth - BAR_GAP, BAR_MAX_WIDTH)
 
-  const scale = (cents: number) => (cents / peak) * armHeight
+  const scale = (cents: number) => (cents / peak) * plotHeight
 
   const active = hovered !== undefined ? days[hovered] : undefined
 
@@ -70,15 +70,27 @@ export function PayPeriodChart({ days, today }: PayPeriodChartProps) {
         onMouseLeave={() => setHovered(undefined)}
       >
         <title id={titleId}>
-          Daily income and expenses across the pay period, {days.length} days
+          Daily net of income and expenses across the pay period, {days.length} days
         </title>
 
-        {/* Zero line, one step stronger than the hairline grid. */}
+        {/* Peak guide, dashed so it reads as a reference rather than a value. */}
         <line
           x1="0"
           x2="100"
-          y1={zeroY}
-          y2={zeroY}
+          y1={TOP_PAD}
+          y2={TOP_PAD}
+          stroke="var(--color-line)"
+          strokeWidth="0.6"
+          strokeDasharray="2,2"
+          vectorEffect="non-scaling-stroke"
+        />
+
+        {/* Baseline, one step stronger than the hairline grid. */}
+        <line
+          x1="0"
+          x2="100"
+          y1={baselineY}
+          y2={baselineY}
           stroke="var(--color-line-strong)"
           strokeWidth="1"
           vectorEffect="non-scaling-stroke"
@@ -87,8 +99,8 @@ export function PayPeriodChart({ days, today }: PayPeriodChartProps) {
         {days.map((day, index) => {
           const centre = index * slotWidth + slotWidth / 2
           const x = centre - barWidth / 2
-          const incomeHeight = scale(day.income)
-          const expenseHeight = scale(day.expenses)
+          const net = day.income - day.expenses
+          const netHeight = scale(Math.abs(net))
           const isToday = day.date === today
 
           return (
@@ -114,26 +126,14 @@ export function PayPeriodChart({ days, today }: PayPeriodChartProps) {
                 />
               )}
 
-              {day.income > 0 && (
+              {net !== 0 && (
                 <rect
                   x={x}
-                  y={zeroY - incomeHeight}
+                  y={baselineY - netHeight}
                   width={barWidth}
-                  height={incomeHeight}
+                  height={netHeight}
                   rx={CORNER}
-                  fill="var(--color-income)"
-                  opacity={hovered === undefined || hovered === index ? 1 : 0.45}
-                />
-              )}
-
-              {day.expenses > 0 && (
-                <rect
-                  x={x}
-                  y={zeroY}
-                  width={barWidth}
-                  height={expenseHeight}
-                  rx={CORNER}
-                  fill="var(--color-expense)"
+                  fill={net > 0 ? 'var(--color-income)' : 'var(--color-expense)'}
                   opacity={hovered === undefined || hovered === index ? 1 : 0.45}
                 />
               )}
