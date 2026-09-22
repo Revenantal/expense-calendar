@@ -1,8 +1,21 @@
 # Expense Calendar
 
-Track expenses on a calendar.
+A personal finance calendar for seeing upcoming income and expenses laid out by date. The main view is a full-month calendar showing what is coming in and what is going out, so it is easy to see at a glance whether a given stretch of days is tight or comfortable.
 
-Built from the [nextjs-ai-template](https://github.com/Revenantal/nextjs-ai-template) starting point.
+It is a planning tool, not an accounting tool. It shows what is scheduled to happen, not what actually happened — there is no reconciliation against a bank account and no tracking of whether a payment cleared.
+
+Built by and for the project owner as a single-user tool: no accounts, no login, no server-side storage. All data lives in the browser, with JSON export/import for backup and moving between devices.
+
+## Features
+
+- **Month calendar** — income and expenses shown per day, with a net total per cell and past days de-emphasised.
+- **Recurring transactions** — one-off, daily, weekly, monthly, semi-monthly, and yearly rules, including last-day-of-month and short-month clamping.
+- **Business-day shifting** — transactions can shift to the nearest business day around weekends and payment-affecting holidays.
+- **Pay period summary** — a diverging bar chart of income vs. expenses across the current pay period, with total income, total expenses, and remaining expenses.
+- **Day detail panel** — every transaction for a selected day, with add/edit/delete and recurrence-scope prompts (this occurrence, this and future, or all).
+- **Dark UI**, desktop-first, no light mode.
+
+See `docs/project/project-brief.md` for the full requirements and the reasoning behind them.
 
 ## Technology
 
