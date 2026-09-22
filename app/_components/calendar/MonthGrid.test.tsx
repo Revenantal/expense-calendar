@@ -118,18 +118,19 @@ describe('day cells', () => {
     )
 
     // 250,000 income less 150,000 rent leaves 1,000.00 positive.
-    expect(within(cell!).getByText(/\+\$1,000\.00/)).toBeInTheDocument()
+    expect(within(cell!).getByText(/\+\$1,000/)).toBeInTheDocument()
   })
 
-  it('shows each transaction amount in full', async () => {
-    // The amount never abbreviates; the label truncates instead.
+  it('shows each transaction amount without truncating the label', async () => {
+    // The label truncates before the amount does; the amount always renders
+    // in full, just rounded to the nearest dollar.
     renderGrid([rent, pay])
     const cell = (await screen.findAllByRole('gridcell')).find(
       (element) => element.dataset.date === '2026-03-01'
     )
 
-    expect(within(cell!).getByText('$1,500.00')).toBeInTheDocument()
-    expect(within(cell!).getByText('$2,500.00')).toBeInTheDocument()
+    expect(within(cell!).getByText('$1,500')).toBeInTheDocument()
+    expect(within(cell!).getByText('$2,500')).toBeInTheDocument()
   })
 
   it('fills trailing days borrowed from the next month', async () => {

@@ -65,15 +65,25 @@ export function toDecimalString(cents: number): string {
  * Builds a plain `$` prefix onto a locale-formatted number rather than
  * asking `Intl` for currency style: `style: 'currency'` with `CAD` renders as
  * `CA$` in every locale except `en-CA`, which would show wrong for the
- * overwhelming majority of browsers. Digit grouping and decimals still come
- * from `Intl`, since those vary correctly by locale.
+ * overwhelming majority of browsers. Digit grouping still comes from `Intl`,
+ * since that varies correctly by locale.
+ *
+ * A negative amount's minus sign goes before the `$`, not between it and the
+ * digits — `formatAmount` already includes the sign from `Intl`, so the `$`
+ * is inserted after it rather than simply prefixed.
+ *
+ * Rounds to the nearest whole dollar — every display in the app is a read
+ * summary, not the editable amount, so pennies are a decimal the reader
+ * cannot act on. Nothing is lost: the stored `amountCents` and the amount
+ * form field both keep full precision.
  *
  * @param cents - Amount in cents.
  * @param locale - Locale to format for. Defaults to the browser's.
- * @returns A formatted string such as `$12.34`.
+ * @returns A formatted string such as `$12` or `-$12`.
  */
 export function formatMoney(cents: number, locale?: string): string {
-  return `$${formatAmount(cents, locale)}`
+  const formatted = formatAmount(cents, locale)
+  return formatted.startsWith('-') ? `-$${formatted.slice(1)}` : `$${formatted}`
 }
 
 /**
@@ -90,17 +100,18 @@ export function formatSignedMoney(cents: number, locale?: string): string {
 }
 
 /**
- * Formats cents as a plain decimal number, with digit grouping but no
+ * Formats cents as a plain whole-dollar number, with digit grouping but no
  * currency symbol.
+ *
+ * Rounds to the nearest dollar; see `formatMoney` for why.
  *
  * @param cents - Amount in cents.
  * @param locale - Locale to format for. Defaults to the browser's.
- * @returns A formatted number such as `1,000.00`.
+ * @returns A formatted number such as `1,000`.
  */
 export function formatAmount(cents: number, locale?: string): string {
   return new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 0,
   }).format(cents / MINOR_UNITS)
 }
 

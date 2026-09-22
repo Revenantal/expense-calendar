@@ -81,48 +81,60 @@ describe('toDecimalString', () => {
 })
 
 describe('formatMoney', () => {
-  it('formats with a plain dollar sign', () => {
+  it('formats with a plain dollar sign and no cents', () => {
     // Locale pinned so the assertion does not depend on the test machine.
-    expect(formatMoney(1234, 'en-CA')).toBe('$12.34')
-    expect(formatMoney(0, 'en-CA')).toBe('$0.00')
+    expect(formatMoney(1234, 'en-CA')).toBe('$12')
+    expect(formatMoney(0, 'en-CA')).toBe('$0')
   })
 
   it('groups thousands', () => {
-    expect(formatMoney(123456789, 'en-CA')).toBe('$1,234,567.89')
+    expect(formatMoney(123456789, 'en-CA')).toBe('$1,234,568')
+  })
+
+  it('rounds to the nearest dollar rather than truncating', () => {
+    expect(formatMoney(1250, 'en-CA')).toBe('$13')
+    expect(formatMoney(1249, 'en-CA')).toBe('$12')
+  })
+
+  it('puts the minus sign before the dollar sign for a negative amount', () => {
+    // The sign has to lead the symbol, not sit between it and the digits —
+    // "-$88", never "$-88".
+    expect(formatMoney(-8800, 'en-CA')).toBe('-$88')
+    expect(formatMoney(-1, 'en-CA')).toBe('-$0')
   })
 
   it('always shows a plain "$", never "CA$", regardless of locale', () => {
     // Intl's currency style renders CAD as "CA$" in every locale except
     // en-CA, which is wrong for the overwhelming majority of browsers.
     // formatMoney must not depend on Intl for the symbol.
-    expect(formatMoney(1234, 'en-US')).toBe('$12.34')
-    expect(formatMoney(1234, 'en-GB')).toBe('$12.34')
-    // fr-CA still uses a comma decimal, but the symbol is always a plain $.
-    expect(formatMoney(1234, 'fr-CA')).toBe('$12,34')
+    expect(formatMoney(1234, 'en-US')).toBe('$12')
+    expect(formatMoney(1234, 'en-GB')).toBe('$12')
+    expect(formatMoney(1234, 'fr-CA')).toBe('$12')
   })
 })
 
 describe('formatAmount', () => {
   it('omits the currency symbol entirely', () => {
-    expect(formatAmount(100_000, 'en-CA')).toBe('1,000.00')
-    expect(formatAmount(1234, 'en-CA')).toBe('12.34')
-    expect(formatAmount(0, 'en-CA')).toBe('0.00')
+    expect(formatAmount(100_000, 'en-CA')).toBe('1,000')
+    expect(formatAmount(1234, 'en-CA')).toBe('12')
+    expect(formatAmount(0, 'en-CA')).toBe('0')
   })
 
-  it('always shows two decimal places', () => {
-    expect(formatAmount(1200, 'en-CA')).toBe('12.00')
-    expect(formatAmount(5, 'en-CA')).toBe('0.05')
+  it('rounds away cents rather than showing them', () => {
+    expect(formatAmount(1200, 'en-CA')).toBe('12')
+    expect(formatAmount(1250, 'en-CA')).toBe('13')
+    expect(formatAmount(5, 'en-CA')).toBe('0')
   })
 })
 
 describe('formatSignedMoney', () => {
   it('prefixes a sign for non-zero values', () => {
-    expect(formatSignedMoney(1234, 'en-CA')).toBe('+$12.34')
-    expect(formatSignedMoney(-1234, 'en-CA')).toBe('-$12.34')
+    expect(formatSignedMoney(1234, 'en-CA')).toBe('+$12')
+    expect(formatSignedMoney(-1234, 'en-CA')).toBe('-$12')
   })
 
   it('leaves zero unsigned', () => {
-    expect(formatSignedMoney(0, 'en-CA')).toBe('$0.00')
+    expect(formatSignedMoney(0, 'en-CA')).toBe('$0')
   })
 })
 
