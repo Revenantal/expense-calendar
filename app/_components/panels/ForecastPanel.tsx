@@ -26,7 +26,7 @@ export function ForecastPanel() {
   const forecast = useMemo(() => {
     const horizonEnd = addDays(today, HORIZON_DAYS)
     const occurrences = expandAll(transactions, today, horizonEnd)
-    return buildForecast(occurrences, today)
+    return buildForecast(occurrences, today, transactions)
   }, [transactions, today])
 
   const isWarning = forecast.outlook === 'shortfall'
