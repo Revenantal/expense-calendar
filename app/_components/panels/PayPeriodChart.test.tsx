@@ -19,7 +19,9 @@ describe('PayPeriodChart', () => {
 
   it('describes itself for screen readers', () => {
     render(<PayPeriodChart days={days} today="2026-03-01" />)
-    expect(screen.getByRole('img', { name: /daily net of income and expenses/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('img', { name: /daily net of income and expenses/i })
+    ).toBeInTheDocument()
   })
 
   it('keeps a slot for every day, including quiet ones', () => {

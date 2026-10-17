@@ -92,6 +92,16 @@ http://localhost:3000
 npm run build
 ```
 
+## Docker and GitHub Actions
+
+The optional Docker image works with any Docker host. GitHub Actions checks the
+application, builds and smoke-tests the image, and publishes it to
+`ghcr.io/<repository-owner>/expense-calendar` on successful `main` builds.
+Normal `npm` development and builds still work without Docker or Coolify.
+
+See [deployment guidance](docs/maintainability/container-deployment.md) for local
+Docker commands, image visibility, rollback, and optional Coolify deployment.
+
 ## Testing
 
 ```bash

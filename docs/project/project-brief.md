@@ -308,7 +308,7 @@ Mobile is not a target. Smaller screens are not designed for and no responsive l
 
 ## Technical Requirements
 
-- Next.js with the App Router, TypeScript, deployed on Vercel.
+- Next.js with the App Router and TypeScript. Support ordinary Node.js hosting and an optional Docker image built by GitHub Actions. Build remotely so small deployment servers only need to run the finished image. Hosting credentials and deployment targets belong in private deployment settings, not committed source. Docker remains optional for people downloading the project.
 - **No database.** All data is stored locally in the browser.
 - **No authentication.** No login wall, no accounts.
 - No backend persistence of any kind. The deployed app is a static client-side tool.
