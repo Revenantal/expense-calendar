@@ -78,7 +78,7 @@ jobs:
         run: |
           docker run -d --name smoke -p 127.0.0.1:3000:3000 "$IMAGE"
           trap 'docker logs smoke; docker rm -f smoke' EXIT
-          curl --fail --silent --show-error --retry 12 --retry-connrefused --retry-delay 2 --max-time 10 http://127.0.0.1:3000/ -o /tmp/home.html
+          curl --fail --silent --show-error --retry 12 --retry-all-errors --retry-delay 2 --retry-max-time 60 --max-time 10 http://127.0.0.1:3000/ -o /tmp/home.html
           grep -q 'Expense Calendar' /tmp/home.html
           asset=$(grep -oE '/_next/static/[^" ]+\.css' /tmp/home.html | head -1)
           test -n "$asset"
