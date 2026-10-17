@@ -62,6 +62,7 @@ If a project comes with design or copy handoff material, add a `docs/original-bu
 - `maintainability/content-model.md` — Long-term notes for maintaining content.
 - `maintainability/assets-and-resources.md` — Long-term notes for public assets and downloadable resources.
 - `maintainability/deployment-checklist.md` — Launch and production-update checklist.
+- `maintainability/container-deployment.md` — Optional Docker builds, GitHub image publishing, and Coolify setup.
 
 ## Archive Rules
 
